@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -76,6 +76,22 @@
         }
         .lock-box button:hover { background: #0056b3; }
         #pw-error { color: #dc3545; font-size: 14px; margin-top: 12px; display: none; font-weight: bold; }
+        .category-select {
+            padding: 8px 14px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 12px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .category-select:focus {
+            border-color: #007bff;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
@@ -108,14 +124,12 @@
         <button class="btn-reset" onclick="resetSelection('external')">초기화</button>
     </h2>
     <div class="btn-container">
-        <h3>🔥 솔로지옥 시리즈</h3>
-        <div id="section-solojiok" class="flex-wrap" style="margin-bottom: 15px;"></div>
-
-        <h3>💘 환승연애 시리즈</h3>
-        <div id="section-transfer" class="flex-wrap" style="margin-bottom: 15px;"></div>
-
-        <h3>💬 하트시그널 / 하트페어링</h3>
-        <div id="section-heart" class="flex-wrap"></div>
+        <select id="external-category-select" class="category-select" onchange="filterExternalCategory()">
+            <option value="solojiok">🔥 솔로지옥 시리즈</option>
+            <option value="transfer">💘 환승연애 시리즈</option>
+            <option value="heart">💬 하트시그널 / 하트페어링</option>
+        </select>
+        <div id="external-buttons-container" class="flex-wrap"></div>
     </div>
 
     <h2>
@@ -207,15 +221,7 @@
                 internalContainer.appendChild(btn);
             });
 
-            externalData.forEach((c, idx) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn external-btn';
-                btn.innerHTML = `${c.creator}<span class="order-badge" id="ext-badge-${idx}">-</span>`;
-                btn.onclick = () => toggleRowSelection('external', idx, btn);
-                
-                const targetSection = document.getElementById(`section-${c.show}`);
-                if (targetSection) targetSection.appendChild(btn);
-            });
+            filterExternalCategory();
 
             const itemContainer = document.getElementById('item-buttons');
             const blankItemBtn = document.createElement('button');
@@ -244,6 +250,27 @@
             }
             updateBadges('creators');
             renderTable();
+        }
+
+        function filterExternalCategory() {
+            const select = document.getElementById('external-category-select');
+            if (!select) return;
+            const selectedShow = select.value;
+            const container = document.getElementById('external-buttons-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            externalData.forEach((c, idx) => {
+                if (c.show === selectedShow) {
+                    const btn = document.createElement('button');
+                    const pos = selectedRows.findIndex(item => item.dbType === 'external' && item.index === idx);
+                    btn.className = 'btn external-btn' + (pos > -1 ? ' active' : '');
+                    const badgeText = pos > -1 ? pos + 1 : '-';
+                    btn.innerHTML = `${c.creator}<span class="order-badge" id="ext-badge-${idx}">${badgeText}</span>`;
+                    btn.onclick = () => toggleRowSelection('external', idx, btn);
+                    container.appendChild(btn);
+                }
+            });
         }
 
         function addBlankCreator() {
@@ -309,7 +336,7 @@
                 updateBadges('creators');
             } else if (type === 'external') {
                 selectedRows = selectedRows.filter(item => item.dbType !== 'external');
-                document.querySelectorAll('.external-btn').forEach(b => b.classList.remove('active'));
+                filterExternalCategory();
                 updateBadges('creators');
             } else if (type === 'items') {
                 selectedItems = [];
