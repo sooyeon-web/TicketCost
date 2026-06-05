@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -138,6 +138,14 @@
     </h2>
     <div class="btn-container">
         <div id="item-buttons" class="flex-wrap"></div>
+    </div>
+
+    <h2>
+        <span>4. 외부 크리에이터 단가 조정</span>
+    </h2>
+    <div class="btn-container">
+        <input type="number" id="external-price-adjust" value="0" style="padding: 8px 12px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; width: 120px; outline: none;" oninput="renderTable()">
+        <span style="font-size: 14px; font-weight: bold; margin-left: 6px;">(만원)</span>
     </div>
 
     <div class="action-container">
@@ -355,14 +363,31 @@
             return creator.youtube_url || creator.instagram_url || "#";
         }
 
-        function getValueFromData(creator, itemConfig) {
+        function getValueFromData(creator, itemConfig, isExternal = false) {
             let val = null;
             if (itemConfig.group === 'direct') {
                 val = creator[itemConfig.key];
             } else {
                 val = creator[itemConfig.group] ? creator[itemConfig.group][itemConfig.key] : null;
             }
-            return val === null || val === undefined ? "-" : val;
+            
+            if (val === null || val === undefined || val === "-") {
+                return "-";
+            }
+            
+            if (isExternal && (itemConfig.group === 'youtube' || itemConfig.group === 'instagram')) {
+                const adjInput = document.getElementById('external-price-adjust');
+                const adjValue = adjInput ? parseInt(adjInput.value, 10) || 0 : 0;
+                if (adjValue !== 0) {
+                    const numericStr = val.replace(/,/g, '');
+                    const numericVal = parseInt(numericStr, 10);
+                    if (!isNaN(numericVal)) {
+                        const newVal = numericVal + adjValue;
+                        return newVal.toLocaleString('ko-KR');
+                    }
+                }
+            }
+            return val;
         }
 
         function getDynamicNotices() {
@@ -456,7 +481,7 @@
                         if (colTarget.type === 'blank') {
                             html += `<td ${tdCenterStyle}>&nbsp;</td>`;
                         } else {
-                            const val = getValueFromData(creator, colTarget.config);
+                            const val = getValueFromData(creator, colTarget.config, rowTarget.dbType === 'external');
                             const isLeftAlign = (colTarget.config.label === "채널 소개" || colTarget.config.label === "2차 활용");
                             let tdStyle = tdCenterStyle;
                             let cellClass = '';
@@ -528,7 +553,7 @@
                     row.push(creator.creator);
                     selectedItems.forEach(colTarget => {
                         if (colTarget.type === 'blank') { row.push(""); } else {
-                            let val = getValueFromData(creator, colTarget.config);
+                            let val = getValueFromData(creator, colTarget.config, rowTarget.dbType === 'external');
                             if (val.includes('\n')) { val = `"${val}"`; }
                             row.push(val);
                         }
