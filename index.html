@@ -1,106 +1,594 @@
 ﻿<!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>인터랙티브 단가 추출 도구 v6.2</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
-        body { font-family: 'Malgun Gothic', dotum, sans-serif; margin: 20px; background-color: #f9f9f9; color: #333; }
-        h1 { font-size: 24px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        h2 { font-size: 16px; margin-top: 20px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        h3 { font-size: 13px; color: #555; margin-top: 12px; margin-bottom: 6px; border-left: 3px solid #007bff; padding-left: 6px; }
-        
-        /* 컨트롤 섹션 */
-        .btn-container { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        .flex-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
-        
-        /* 버튼 스타일 */
-        .btn { padding: 8px 14px; border: 1px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
-        .btn:hover { background: #f0f0f0; }
-        .btn.active { background: #007bff; color: #fff; border-color: #0056b3; }
-        .btn.active .order-badge { background: rgba(255,255,255,0.3); color: #fff; }
-        
-        /* 공란 버튼 특화 스타일 */
-        .btn-blank { background: #f8f9fa; border: 1px dashed #6c757d; font-weight: bold; color: #495057; }
-        .btn-blank:hover { background: #e2e6ea; }
-        
-        .order-badge { display: inline-block; width: 18px; height: 18px; background: #eee; color: #666; border-radius: 50%; text-align: center; line-height: 18px; font-size: 11px; margin-left: 6px; font-weight: bold; }
-        
-        .btn-reset { padding: 4px 8px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-reset:hover { background: #bd2130; }
-        
-        /* 결과 및 복사 섹션 */
-        .action-container { margin: 20px 0; display: flex; gap: 10px; }
-        .btn-action { padding: 10px 20px; font-size: 15px; font-weight: bold; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-action:hover { background: #218838; }
-        .btn-text { background: #17a2b8; }
-        .btn-text:hover { background: #138496; }
-        
-        /* 미리보기 표 스타일 (열 너비 강제 고정 셋팅) */
-        .table-responsive { overflow-x: auto; background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; }
-        table { width: max-content; border-collapse: collapse; font-size: 10pt; table-layout: fixed; }
-        th, td { border: 1px solid #cccccc; padding: 10px; text-align: center; vertical-align: top; word-break: keep-all; word-wrap: break-word; }
-        th { background-color: #f2f2f2; font-weight: bold; }
-        
-        /* 🌟 웹 화면 뷰 전용 열 너비 클래스 정의 */
-        .col-standard { width: 110px; }      /* 크리에이터, 단가, 공란 고정 너비 */
-        .col-description { width: 280px; }   /* 채널 소개 넓은 너비 */
-        .col-license { width: 350px; }       /* 2차 활용 너비 */
-        .align-left { text-align: left; white-space: pre-line; line-height: 1.5; }
-        
-        .table-footer-notice { margin-top: 12px; font-size: 10pt; color: #555; font-weight: bold; line-height: 1.5; }
-        a { color: #007bff; text-decoration: none; font-weight: bold; }
-        a:hover { text-decoration: underline; }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 4px; display: none; z-index: 1000; }
+        :root {
+            --bg-app: #f8fafc; /* Slate 50 */
+            --bg-card: #ffffff;
+            --text-primary: #0f172a; /* Slate 900 */
+            --text-secondary: #475569; /* Slate 600 */
+            --text-muted: #64748b; /* Slate 500 */
+            --border-color: #e2e8f0; /* Slate 200 */
+            
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --success-color: #10b981;
+            --success-hover: #059669;
+            
+            --info-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            --info-color: #0ea5e9;
+            --info-hover: #0284c7;
+            
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
 
-        /* 보안 잠금 화면 스타일 */
-        #password-lock {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #f4f6f9; z-index: 9999; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            font-family: 'Malgun Gothic', dotum, sans-serif;
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .lock-box {
-            background: #ffffff; padding: 30px; border-radius: 8px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;
+
+        /* App Container */
+        .app-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            box-sizing: border-box;
         }
-        .lock-box h2 { font-size: 20px; margin-bottom: 20px; color: #333; justify-content: center; }
-        .lock-box input {
-            padding: 12px; font-size: 16px; border: 1px solid #ddd; 
-            border-radius: 4px; width: 240px; margin-right: 8px; outline: none;
+
+        /* Header */
+        .app-header {
+            margin-bottom: 32px;
         }
-        .lock-box input:focus { border-color: #007bff; }
-        .lock-box button {
-            padding: 12px 20px; font-size: 16px; background: #007bff; 
-            color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
+
+        .app-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .lock-box button:hover { background: #0056b3; }
-        #pw-error { color: #dc3545; font-size: 14px; margin-top: 12px; display: none; font-weight: bold; }
-        .category-select {
+
+        .app-header h1 .version-tag {
+            font-size: 13px;
+            font-weight: 600;
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            letter-spacing: 0;
+        }
+
+        .app-header .subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 480px 1fr;
+            }
+        }
+
+        .controls-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .preview-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: #ffffff;
+        }
+
+        .card-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Flex Wrap for Buttons */
+        .flex-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: inherit;
             padding: 8px 14px;
             font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: #fff;
-            color: #333;
-            font-weight: bold;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: var(--text-primary);
+            transform: translateY(-0.5px);
+        }
+
+        .btn:active {
+            transform: translateY(0.5px);
+        }
+
+        .btn.active {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn.active:hover {
+            background: var(--primary-hover);
+            color: #ffffff;
+        }
+
+        /* Order Badge */
+        .order-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            background: #f1f5f9;
+            color: var(--text-secondary);
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            box-sizing: border-box;
+        }
+
+        .btn.active .order-badge {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+        }
+
+        /* Blank Button */
+        .btn-blank {
+            background: #f8fafc;
+            border: 1.5px dashed var(--border-color);
+            color: var(--primary-color);
+            font-weight: 600;
+            justify-content: center;
             margin-bottom: 12px;
+        }
+
+        .btn-blank:hover {
+            background: #f0f2f5;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-blank .order-badge {
+            background: #e0e7ff;
+            color: var(--primary-color);
+        }
+
+        /* Reset Button */
+        .btn-reset {
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            background: #ffe4e6;
+            color: #be123c;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: #fecdd3;
+            color: #9f1239;
+        }
+
+        /* Dropdown */
+        .category-select {
+            font-family: inherit;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #ffffff;
+            color: var(--text-primary);
             outline: none;
             cursor: pointer;
             transition: border-color 0.2s;
         }
+
         .category-select:focus {
-            border-color: #007bff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Adjust Input */
+        .adjust-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #external-price-adjust {
+            font-family: inherit;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            width: 100px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #external-price-adjust:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+
+        .adjust-unit {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Preview Header Actions */
+        .preview-card {
+            height: 100%;
+        }
+
+        .preview-header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .preview-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .action-buttons-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            font-family: inherit;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #ffffff;
+        }
+
+        .copy-gmail {
+            background: var(--success-gradient);
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .copy-gmail:hover {
+            background: var(--success-hover);
+            transform: translateY(-0.5px);
+        }
+
+        .copy-text {
+            background: var(--info-gradient);
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+        }
+
+        .copy-text:hover {
+            background: var(--info-hover);
+            transform: translateY(-0.5px);
+        }
+
+        /* Table Design */
+        .preview-body {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #ffffff;
+            max-height: 700px;
+        }
+
+        #table-output table {
+            width: max-content;
+            border-collapse: collapse;
+            font-size: 13px;
+            table-layout: fixed;
+            color: var(--text-primary);
+            font-family: 'Pretendard', -apple-system, sans-serif !important;
+        }
+
+        #table-output th, #table-output td {
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
+            text-align: center;
+            vertical-align: middle;
+            word-break: keep-all;
+            word-wrap: break-word;
+        }
+
+        #table-output th {
+            background-color: #f8fafc;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        #table-output tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Table Column Classes */
+        .col-standard {
+            width: 120px;
+        }
+
+        .col-description {
+            width: 300px;
+        }
+
+        .col-license {
+            width: 380px;
+        }
+
+        .align-left {
+            text-align: left;
+            white-space: pre-line;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        /* Table Footer Notices */
+        .table-footer-notice {
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        /* Links */
+        #table-output a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        #table-output a:hover {
+            text-decoration: underline;
+        }
+
+        /* Placeholder */
+        .placeholder-text {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            z-index: 10000;
+            animation: fadeInUp 0.2s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 10px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        /* 보안 잠금 화면 스타일 */
+        #password-lock {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
+                        radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.15), transparent 40%),
+                        #0f172a; /* Sleek dark theme lock screen */
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .lock-box {
+            background: rgba(30, 41, 59, 0.7); /* slate dark glass */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+            text-align: center;
+            width: 380px;
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+
+        .lock-box h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 24px 0;
+            color: #ffffff;
+            letter-spacing: -0.025em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .lock-box input {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 15px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            color: #ffffff;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .lock-box input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .lock-box button {
+            padding: 14px 24px;
+            font-size: 15px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            white-space: nowrap;
+        }
+
+        .lock-box button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        #pw-error {
+            color: #f87171; /* red 400 */
+            font-size: 13.5px;
+            margin: 16px 0 0 0;
+            display: none;
+            font-weight: 500;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
+
 <body style="display: none;">
 
     <div id="password-lock">
         <div class="lock-box">
             <h2>🔒 대외비 단가 확인 도구</h2>
-            <div style="display: flex; justify-content: center; align-items: center;">
+            <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
                 <input type="password" id="pw-input" placeholder="비밀번호를 입력하세요">
                 <button onclick="checkPassword()">확인</button>
             </div>
@@ -108,54 +596,95 @@
         </div>
     </div>
 
-    <h1>📊 단가 추출 테이블 빌더 (단가 수정 및 푸터 추가)</h1>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>📊 크리에이터 단가 추출 <span class="version-tag">v6.2</span></h1>
+            <p class="subtitle">대외비 단가 정보를 실시간으로 추출하고 간편하게 복사할 수 있는 대시보드입니다.</p>
+        </header>
 
-    <h2>
-        <span>1. 내부 크리에이터 선택 (클릭 순서대로 반영, 공란은 다중 누적 가능)</span>
-        <button class="btn-reset" onclick="resetSelection('internal')">초기화</button>
-    </h2>
-    <div class="btn-container">
-        <button class="btn btn-blank" style="margin-bottom: 12px;" onclick="addBlankCreator()">➕ 공란 행 추가 <span class="order-badge" id="blank-creator-badge">0</span></button>
-        <div id="internal-buttons" class="flex-wrap"></div>
-    </div>
+        <div class="dashboard-grid">
+            <div class="controls-column">
+                <!-- Section 1 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <span>1. 내부 크리에이터 선택</span>
+                            <button class="btn-reset" onclick="resetSelection('internal')">초기화</button>
+                        </h2>
+                        <span class="card-desc">클릭 순서대로 반영됩니다. (공란 행 추가 가능)</span>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-blank" onclick="addBlankCreator()">➕ 공란 행 추가 <span class="order-badge" id="blank-creator-badge">0</span></button>
+                        <div id="internal-buttons" class="flex-wrap"></div>
+                    </div>
+                </div>
 
-    <h2>
-        <span>2. 외부 크리에이터 선택</span>
-        <button class="btn-reset" onclick="resetSelection('external')">초기화</button>
-    </h2>
-    <div class="btn-container">
-        <select id="external-category-select" class="category-select" onchange="filterExternalCategory()">
-            <option value="solojiok">🔥 솔로지옥 시리즈</option>
-            <option value="transfer">💘 환승연애 시리즈</option>
-            <option value="heart">💬 하트시그널 / 하트페어링</option>
-        </select>
-        <div id="external-buttons-container" class="flex-wrap"></div>
-    </div>
+                <!-- Section 2 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <span>2. 외부 크리에이터 선택</span>
+                            <button class="btn-reset" onclick="resetSelection('external')">초기화</button>
+                        </h2>
+                        <span class="card-desc">드롭박스로 카테고리를 분류하여 버튼을 필터링할 수 있습니다.</span>
+                    </div>
+                    <div class="card-body">
+                        <select id="external-category-select" class="category-select" onchange="filterExternalCategory()">
+                            <option value="solojiok">🔥 솔로지옥 시리즈</option>
+                            <option value="transfer">💘 환승연애 시리즈</option>
+                            <option value="heart">💬 하트시그널 / 하트페어링</option>
+                        </select>
+                        <div id="external-buttons-container" class="flex-wrap"></div>
+                    </div>
+                </div>
 
-    <h2>
-        <span>3. 항목 선택 (클릭 순서대로 열 배치, 공란은 다중 누적 가능)</span>
-        <button class="btn-reset" onclick="resetSelection('items')">초기화</button>
-    </h2>
-    <div class="btn-container">
-        <div id="item-buttons" class="flex-wrap"></div>
-    </div>
+                <!-- Section 3 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <span>3. 항목 선택</span>
+                            <button class="btn-reset" onclick="resetSelection('items')">초기화</button>
+                        </h2>
+                        <span class="card-desc">클릭 순서대로 열 배치가 이루어집니다. (공란 열 추가 가능)</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="item-buttons" class="flex-wrap"></div>
+                    </div>
+                </div>
 
-    <h2>
-        <span>4. 외부 크리에이터 단가 조정</span>
-    </h2>
-    <div class="btn-container">
-        <input type="number" id="external-price-adjust" value="0" style="padding: 8px 12px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; width: 120px; outline: none;" oninput="renderTable()">
-        <span style="font-size: 14px; font-weight: bold; margin-left: 6px;">(만원)</span>
-    </div>
+                <!-- Section 4 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>4. 외부 크리에이터 단가 조정</h2>
+                        <span class="card-desc">입력된 숫자값(만원) 만큼 외부 크리에이터 단가에 일괄 가산됩니다.</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="adjust-input-wrapper">
+                            <input type="number" id="external-price-adjust" value="0" oninput="renderTable()">
+                            <span class="adjust-unit">(만원)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <div class="action-container">
-        <button class="btn-action" onclick="copyToGmail()">📋 Gmail 붙여넣기용 복사 (HTML)</button>
-        <button class="btn-action btn-text" onclick="copyToText()">📝 텍스트로 복사 (Tab 구분)</button>
-    </div>
-
-    <h2>실시간 미리보기</h2>
-    <div class="table-responsive" id="table-output">
-        <p style="color: #666; text-align: center; padding: 20px;">크리에이터와 항목을 선택하면 표가 생성됩니다.</p>
+            <div class="preview-column">
+                <!-- Preview Card -->
+                <div class="card preview-card">
+                    <div class="card-header preview-header">
+                        <h2>실시간 미리보기</h2>
+                        <div class="action-buttons-group">
+                            <button class="btn-action copy-gmail" onclick="copyToGmail()">📋 Gmail용 복사 (HTML)</button>
+                            <button class="btn-action copy-text" onclick="copyToText()">📝 텍스트 복사 (Tab)</button>
+                        </div>
+                    </div>
+                    <div class="card-body preview-body">
+                        <div class="table-responsive" id="table-output">
+                            <p class="placeholder-text">크리에이터와 항목을 선택하면 표가 생성됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast">복사되었습니다!</div>
@@ -178,20 +707,20 @@
             try {
                 const key = CryptoJS.SHA256(inputPw);
                 const iv = CryptoJS.enc.Utf8.parse("ticketcost_iv_16");
-                
+
                 const decrypted = CryptoJS.AES.decrypt(ENCRYPTED_DATA, key, {
                     iv: iv,
                     mode: CryptoJS.mode.CBC,
                     padding: CryptoJS.pad.Pkcs7
                 });
-                
+
                 const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
                 if (!decryptedText) throw new Error("Decryption failed");
-                
+
                 const data = JSON.parse(decryptedText);
                 creatorsData = data.creatorsData;
                 externalData = data.externalData;
-                
+
                 document.getElementById('password-lock').remove();
                 init();
             } catch (e) {
@@ -212,7 +741,7 @@
             { label: "2차 활용", group: "direct", key: "license" }
         ];
 
-        let selectedRows = []; 
+        let selectedRows = [];
         let selectedItems = [];
         let blankCreatorCounter = 0;
         let blankItemCounter = 0;
@@ -312,14 +841,14 @@
             if (type === 'creators') {
                 creatorsData.forEach((_, idx) => {
                     const badge = document.getElementById(`c-badge-${idx}`);
-                    if(badge) {
+                    if (badge) {
                         const pos = selectedRows.findIndex(item => item.dbType === 'internal' && item.index === idx);
                         badge.textContent = pos > -1 ? pos + 1 : '-';
                     }
                 });
                 externalData.forEach((_, idx) => {
                     const badge = document.getElementById(`ext-badge-${idx}`);
-                    if(badge) {
+                    if (badge) {
                         const pos = selectedRows.findIndex(item => item.dbType === 'external' && item.index === idx);
                         badge.textContent = pos > -1 ? pos + 1 : '-';
                     }
@@ -370,11 +899,11 @@
             } else {
                 val = creator[itemConfig.group] ? creator[itemConfig.group][itemConfig.key] : null;
             }
-            
+
             if (val === null || val === undefined || val === "-") {
                 return "-";
             }
-            
+
             if (isExternal && (itemConfig.group === 'youtube' || itemConfig.group === 'instagram')) {
                 const adjInput = document.getElementById('external-price-adjust');
                 const adjValue = adjInput ? parseInt(adjInput.value, 10) || 0 : 0;
@@ -415,7 +944,7 @@
             if (selectedRows.length === 0 || selectedItems.length === 0) {
                 return `<p style="color: #666; text-align: center; padding: 20px;">크리에이터(행)와 항목(열)을 선택해 주세요.</p>`;
             }
-            
+
             let totalWidth = 110;
             selectedItems.forEach(item => {
                 if (item.type === 'blank') {
@@ -433,15 +962,15 @@
             const thStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:top; font-size:10pt; word-break:keep-all; word-wrap:break-word;" width="110"' : 'class="col-standard"';
             const tdCenterStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; text-align:center; vertical-align:top; font-size:10pt; word-break:keep-all; word-wrap:break-word;"' : '';
             const titleStyle = isForEmail ? 'style="font-size:10pt; font-weight:bold; font-family:\'Malgun Gothic\', sans-serif; margin-bottom:10px;"' : 'style="font-size:10pt; font-weight:bold; margin-bottom:10px;"';
-            
+
             let html = `<div ${titleStyle}>[크리에이터 리스트]</div>`;
             html += `<table ${tableStyle}>`;
-            
+
             // 🌟 헤더(제목 행) 고정 폭 인라인 및 클래스 주입
             html += `<thead><tr><th ${thStyle}>크리에이터</th>`;
             selectedItems.forEach(item => {
                 let thWidthStyle = isForEmail ? ' width="110"' : ' class="col-standard"'; // 기본 단가 및 공란 열 (너비 고정)
-                
+
                 if (item.type === 'real') {
                     if (item.config.label === "채널 소개") {
                         thWidthStyle = isForEmail ? ' width="280"' : ' class="col-description"'; // 채널 소개 열 (넓게 고정)
@@ -476,7 +1005,7 @@
                     } else {
                         html += `<td ${tdCenterStyle}>${creator.creator}</td>`;
                     }
-                    
+
                     selectedItems.forEach(colTarget => {
                         if (colTarget.type === 'blank') {
                             html += `<td ${tdCenterStyle}>&nbsp;</td>`;
@@ -485,14 +1014,14 @@
                             const isLeftAlign = (colTarget.config.label === "채널 소개" || colTarget.config.label === "2차 활용");
                             let tdStyle = tdCenterStyle;
                             let cellClass = '';
-                            
+
                             if (isLeftAlign) {
                                 const formattedVal = isForEmail ? val.replace(/\n/g, '<br>') : val;
                                 const widthVal = colTarget.config.label === "채널 소개" ? '280' : '350';
                                 const maxClass = colTarget.config.label === "채널 소개" ? 'col-description' : 'col-license';
-                                
-                                tdStyle = isForEmail 
-                                    ? `style="border:1px solid #cccccc; padding:10px; text-align:left; vertical-align:top; white-space:pre-line; line-height:1.5; font-size:10pt; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"` 
+
+                                tdStyle = isForEmail
+                                    ? `style="border:1px solid #cccccc; padding:10px; text-align:left; vertical-align:top; white-space:pre-line; line-height:1.5; font-size:10pt; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"`
                                     : '';
                                 cellClass = isForEmail ? '' : `class="align-left ${maxClass}"`;
                                 html += `<td ${tdStyle} ${cellClass}>${formattedVal}</td>`;
@@ -505,7 +1034,7 @@
                 html += `</tr>`;
             });
             html += `</tbody></table>`;
-            
+
             const footerStyle = isForEmail ? 'style="margin-top:12px; font-size:10pt; color:#555; font-weight:bold; font-family:\'Malgun Gothic\', sans-serif; line-height:1.5;"' : 'class="table-footer-notice"';
             html += `<div ${footerStyle}>${noticeText}`;
             const extraNotices = getDynamicNotices();
@@ -513,7 +1042,7 @@
                 html += `<br>` + extraNotices.join("<br>");
             }
             html += `</div>`;
-            
+
             return html;
         }
 
@@ -571,12 +1100,5 @@
 
     </script>
 </body>
+
 </html>
-
-
-
-
-
-
-
-
