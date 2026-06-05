@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -39,13 +39,13 @@
         /* 미리보기 표 스타일 (열 너비 강제 고정 셋팅) */
         .table-responsive { overflow-x: auto; background: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd; }
         table { width: max-content; border-collapse: collapse; font-size: 10pt; table-layout: fixed; }
-        th, td { border: 1px solid #cccccc; padding: 10px; text-align: center; vertical-align: top; word-break: break-all; word-wrap: break-word; }
+        th, td { border: 1px solid #cccccc; padding: 10px; text-align: center; vertical-align: top; word-break: keep-all; word-wrap: break-word; }
         th { background-color: #f2f2f2; font-weight: bold; }
         
         /* 🌟 웹 화면 뷰 전용 열 너비 클래스 정의 */
-        .col-standard { width: 90px; }      /* 크리에이터, 단가, 공란 고정 너비 */
-        .col-description { width: 240px; }   /* 채널 소개 넓은 너비 */
-        .col-license { width: 300px; }       /* 2차 활용 너비 */
+        .col-standard { width: 110px; }      /* 크리에이터, 단가, 공란 고정 너비 */
+        .col-description { width: 280px; }   /* 채널 소개 넓은 너비 */
+        .col-license { width: 350px; }       /* 2차 활용 너비 */
         .align-left { text-align: left; white-space: pre-line; line-height: 1.5; }
         
         .table-footer-notice { margin-top: 12px; font-size: 10pt; color: #555; font-weight: bold; line-height: 1.5; }
@@ -391,9 +391,22 @@
                 return `<p style="color: #666; text-align: center; padding: 20px;">크리에이터(행)와 항목(열)을 선택해 주세요.</p>`;
             }
             
-            const tableStyle = isForEmail ? 'style="border-collapse:collapse; font-size:10pt; font-family:\'Malgun Gothic\', sans-serif; table-layout:fixed;"' : '';
-            const thStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:top; font-size:10pt; word-break:break-all;" width="110"' : 'class="col-standard"';
-            const tdCenterStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; text-align:center; vertical-align:top; font-size:10pt; word-break:break-all;"' : '';
+            let totalWidth = 110;
+            selectedItems.forEach(item => {
+                if (item.type === 'blank') {
+                    totalWidth += 110;
+                } else if (item.config.label === "채널 소개") {
+                    totalWidth += 280;
+                } else if (item.config.label === "2차 활용") {
+                    totalWidth += 350;
+                } else {
+                    totalWidth += 110;
+                }
+            });
+
+            const tableStyle = `style="width:${totalWidth}px; border-collapse:collapse; font-size:10pt; font-family:'Malgun Gothic', sans-serif; table-layout:fixed;"`;
+            const thStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:top; font-size:10pt; word-break:keep-all; word-wrap:break-word;" width="110"' : 'class="col-standard"';
+            const tdCenterStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; text-align:center; vertical-align:top; font-size:10pt; word-break:keep-all; word-wrap:break-word;"' : '';
             const titleStyle = isForEmail ? 'style="font-size:10pt; font-weight:bold; font-family:\'Malgun Gothic\', sans-serif; margin-bottom:10px;"' : 'style="font-size:10pt; font-weight:bold; margin-bottom:10px;"';
             
             let html = `<div ${titleStyle}>[크리에이터 리스트]</div>`;
@@ -406,13 +419,13 @@
                 
                 if (item.type === 'real') {
                     if (item.config.label === "채널 소개") {
-                        thWidthStyle = isForEmail ? ' width="260"' : ' class="col-description"'; // 채널 소개 열 (넓게 고정)
+                        thWidthStyle = isForEmail ? ' width="280"' : ' class="col-description"'; // 채널 소개 열 (넓게 고정)
                     } else if (item.config.label === "2차 활용") {
-                        thWidthStyle = isForEmail ? ' width="320"' : ' class="col-license"';     // 2차 활용 열
+                        thWidthStyle = isForEmail ? ' width="350"' : ' class="col-license"';     // 2차 활용 열
                     }
                 }
                 const headText = item.type === 'blank' ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : item.config.label;
-                html += `<th ${isForEmail ? 'style="border:1px solid #cccccc; padding:10px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:top; font-size:10pt; word-break:break-all;"' : ''}${thWidthStyle}>${headText}</th>`;
+                html += `<th ${isForEmail ? 'style="border:1px solid #cccccc; padding:10px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:top; font-size:10pt; word-break:keep-all; word-wrap:break-word;"' : ''}${thWidthStyle}>${headText}</th>`;
             });
             html += `</tr></thead><tbody>`;
 
@@ -450,11 +463,11 @@
                             
                             if (isLeftAlign) {
                                 const formattedVal = isForEmail ? val.replace(/\n/g, '<br>') : val;
-                                const widthVal = colTarget.config.label === "채널 소개" ? '260' : '320';
+                                const widthVal = colTarget.config.label === "채널 소개" ? '280' : '350';
                                 const maxClass = colTarget.config.label === "채널 소개" ? 'col-description' : 'col-license';
                                 
                                 tdStyle = isForEmail 
-                                    ? `style="border:1px solid #cccccc; padding:10px; text-align:left; vertical-align:top; white-space:pre-line; line-height:1.5; font-size:10pt; word-break:break-all;" width="${widthVal}"` 
+                                    ? `style="border:1px solid #cccccc; padding:10px; text-align:left; vertical-align:top; white-space:pre-line; line-height:1.5; font-size:10pt; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"` 
                                     : '';
                                 cellClass = isForEmail ? '' : `class="align-left ${maxClass}"`;
                                 html += `<td ${tdStyle} ${cellClass}>${formattedVal}</td>`;
