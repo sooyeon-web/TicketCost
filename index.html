@@ -835,6 +835,16 @@
             return (currentYear - year) * 12 + (currentMonth - month);
         }
 
+        function formatPrice(val) {
+            if (val === null || val === undefined) return null;
+            let str = String(val).trim();
+            if (str === "" || str === "-") return str || null;
+            return str.replace(/\d+/g, (match) => {
+                const num = parseInt(match, 10);
+                return num.toLocaleString('ko-KR');
+            });
+        }
+
         function has12mExternalCreator() {
             return selectedRows.some(row => {
                 if (row.dbType === 'external') {
@@ -1084,14 +1094,21 @@
                 const adjInput = document.getElementById('external-price-adjust');
                 const adjValue = adjInput ? parseInt(adjInput.value, 10) || 0 : 0;
                 if (adjValue !== 0) {
-                    const numericStr = val.replace(/,/g, '');
+                    const numericStr = String(val).replace(/,/g, '');
                     const numericVal = parseInt(numericStr, 10);
                     if (!isNaN(numericVal)) {
                         const newVal = numericVal + adjValue;
-                        return newVal.toLocaleString('ko-KR');
+                        return formatPrice(newVal);
                     }
                 }
             }
+
+            // 모든 단가 정보에 대해 3자리 콤마 포맷 적용
+            const priceKeys = ['bdc', 'planned_ppl', 'shorts', 'reels', 'feed', 'appearance'];
+            if (priceKeys.includes(itemConfig.key)) {
+                return formatPrice(val);
+            }
+
             return val;
         }
 
@@ -1278,6 +1295,7 @@
 </body>
 
 </html>
+
 
 
 
