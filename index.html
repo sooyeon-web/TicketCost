@@ -837,7 +837,7 @@
 
         function formatPrice(val) {
             if (val === null || val === undefined) return null;
-            let str = String(val).trim();
+            let str = String(val).replace(/,/g, '').trim();
             if (str === "" || str === "-") return str || null;
             return str.replace(/\d+/g, (match) => {
                 const num = parseInt(match, 10);
@@ -1299,6 +1299,7 @@
 </body>
 
 </html>
+
 
 
 
