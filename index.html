@@ -1094,12 +1094,16 @@
                 const adjInput = document.getElementById('external-price-adjust');
                 const adjValue = adjInput ? parseInt(adjInput.value, 10) || 0 : 0;
                 if (adjValue !== 0) {
-                    const numericStr = String(val).replace(/,/g, '');
-                    const numericVal = parseInt(numericStr, 10);
-                    if (!isNaN(numericVal)) {
-                        const newVal = numericVal + adjValue;
-                        return formatPrice(newVal);
-                    }
+                    const parts = String(val).split('~');
+                    const adjustedParts = parts.map(part => {
+                        const numericStr = part.replace(/,/g, '').trim();
+                        const numericVal = parseInt(numericStr, 10);
+                        if (!isNaN(numericVal)) {
+                            return String(numericVal + adjValue);
+                        }
+                        return part;
+                    });
+                    return formatPrice(adjustedParts.join('~'));
                 }
             }
 
@@ -1295,6 +1299,7 @@
 </body>
 
 </html>
+
 
 
 
