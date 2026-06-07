@@ -1471,7 +1471,7 @@
             return label;
         }
 
-        function getItemNoticeText(itemLabel, hasHaeun) {
+        function getItemNoticeText(itemLabel, isHaeunRow) {
             if (itemLabel === "유튜브 브랜디드 콘텐츠") {
                 return " (메인 제품 1개, 서브 제품 최대 2개 기준)";
             }
@@ -1482,8 +1482,8 @@
                 return " (30초 내외 / 해시태그 3개)";
             }
             if (itemLabel === "인스타그램 사진") {
-                if (hasHaeun) {
-                    return " (사진 4장(*성해은 3장) 개런티 / 해시태그 3개 / 브랜드 계정 태그 가능 / 착장 1벌 기준)";
+                if (isHaeunRow) {
+                    return " (사진 3장 개런티 / 해시태그 3개 / 브랜드 계정 태그 가능 / 착장 1벌 기준)";
                 } else {
                     return " (사진 4장 개런티 / 해시태그 3개 / 브랜드 계정 태그 가능 / 착장 1벌 기준)";
                 }
@@ -1500,7 +1500,6 @@
         function copyToText() {
             if (selectedRows.length === 0 || selectedItems.length === 0) return alert('선택된 항목이 없습니다.');
             
-            const hasHaeun = selectedRows.some(c => c.dbType === 'internal' && c.index === 0);
             let resultBlocks = [];
 
             selectedRows.forEach(rowTarget => {
@@ -1510,6 +1509,7 @@
                 }
 
                 const creator = rowTarget.dbType === 'internal' ? creatorsData[rowTarget.index] : externalData[rowTarget.index];
+                const isHaeunRow = (rowTarget.dbType === 'internal' && rowTarget.index === 0);
                 let block = `[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)\n\n`;
 
                 selectedItems.forEach(colTarget => {
@@ -1520,7 +1520,7 @@
                     const label = colTarget.config.label;
                     const val = getValueFromData(creator, colTarget.config, rowTarget.dbType === 'external');
                     const textLabel = getItemLabelForText(label);
-                    const notice = getItemNoticeText(label, hasHaeun);
+                    const notice = getItemNoticeText(label, isHaeunRow);
 
                     const priceKeys = ['bdc', 'planned_ppl', 'shorts', 'reels', 'feed', 'appearance', 'visit_fee', 'regram'];
                     const isPrice = priceKeys.includes(colTarget.config.key);
@@ -1556,6 +1556,7 @@
 </body>
 
 </html>
+
 
 
 
