@@ -536,11 +536,24 @@
             width: 480px;
         }
 
+        .col-description-single {
+            width: 620px;
+        }
+
         #table-output td.align-left {
             text-align: left;
             vertical-align: top;
             white-space: pre-line;
             line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        #table-output td.align-left-single {
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 11px;
+            padding: 4px 6px;
             color: var(--text-secondary);
         }
 
@@ -1282,6 +1295,9 @@
             // '채널 소개' 또는 '2차 활용'이 선택되었는지 체크
             const hasTextHeavy = selectedItems.some(item => item.type === 'real' && (item.config.label === "채널 소개" || item.config.label === "2차 활용"));
             
+            // '2차 활용' 없이 '채널 소개'만 선택된 경우 채널소개를 한 줄(nowrap)로 처리
+            const isSingleLineDescription = selectedItems.some(item => item.type === 'real' && item.config.label === "채널 소개") && !selectedItems.some(item => item.type === 'real' && item.config.label === "2차 활용");
+            
             // 텍스트 헤비 열이 있으면 일반 열의 너비를 10% 축소
             const standardWidthWeb = hasTextHeavy ? 108 : 120;
             const creatorWidthWeb = hasTextHeavy ? 108 : 120;
@@ -1293,7 +1309,11 @@
                 if (item.type === 'blank') {
                     totalWidth += isForEmail ? standardWidthEmail : standardWidthWeb;
                 } else if (item.config.label === "채널 소개") {
-                    totalWidth += isForEmail ? 280 : 300;
+                    if (isSingleLineDescription) {
+                        totalWidth += isForEmail ? 560 : 620;
+                    } else {
+                        totalWidth += isForEmail ? 280 : 300;
+                    }
                 } else if (item.config.label === "2차 활용") {
                     totalWidth += isForEmail ? 450 : 480;
                 } else {
@@ -1317,7 +1337,7 @@
                 if (isForEmail) {
                     if (item.type === 'real') {
                         if (item.config.label === "채널 소개") {
-                            thWidthStyle = ' width="280"';
+                            thWidthStyle = isSingleLineDescription ? ' width="560"' : ' width="280"';
                         } else if (item.config.label === "2차 활용") {
                             thWidthStyle = ' width="450"';
                         } else {
@@ -1329,7 +1349,7 @@
                 } else {
                     if (item.type === 'real') {
                         if (item.config.label === "채널 소개") {
-                            thWidthStyle = ' class="col-description"';
+                            thWidthStyle = isSingleLineDescription ? ' class="col-description-single"' : ' class="col-description"';
                         } else if (item.config.label === "2차 활용") {
                             thWidthStyle = ' class="col-license"';
                         } else {
@@ -1352,8 +1372,11 @@
                         const isLeftAlign = (item.type === 'real' && (item.config.label === "채널 소개" || item.config.label === "2차 활용"));
                         let tdStyle = tdCenterStyle;
                         if (isLeftAlign) {
-                            const widthVal = item.config.label === "채널 소개" ? '260' : '420';
-                            tdStyle = isForEmail ? `style="border:1px solid #cccccc; padding:6px 8px; text-align:left; vertical-align:top; font-size:10pt; font-weight:normal;" width="${widthVal}"` : 'class="align-left"';
+                            let widthVal = '420';
+                            if (item.config.label === "채널 소개") {
+                                widthVal = isSingleLineDescription ? '540' : '260';
+                            }
+                            tdStyle = isForEmail ? `style="border:1px solid #cccccc; padding:6px 8px; text-align:left; vertical-align:${isSingleLineDescription && item.config.label === "채널 소개" ? 'middle' : 'top'}; font-size:10pt; font-weight:normal;" width="${widthVal}"` : (isSingleLineDescription && item.config.label === "채널 소개" ? 'class="align-left-single"' : 'class="align-left"');
                         }
                         html += `<td ${tdStyle}>&nbsp;</td>`;
                     });
@@ -1377,14 +1400,29 @@
                             let cellClass = '';
 
                             if (isLeftAlign) {
-                                const formattedVal = isForEmail ? val.replace(/\n/g, '<br>') : val;
-                                const widthVal = colTarget.config.label === "채널 소개" ? '280' : '450';
-                                const maxClass = colTarget.config.label === "채널 소개" ? 'col-description' : 'col-license';
+                                let formattedVal = val;
+                                if (colTarget.config.label === "채널 소개" && isSingleLineDescription) {
+                                    formattedVal = val.replace(/\n/g, ' / ');
+                                } else {
+                                    formattedVal = isForEmail ? val.replace(/\n/g, '<br>') : val;
+                                }
+
+                                let widthVal = '450';
+                                let maxClass = 'col-license';
+                                if (colTarget.config.label === "채널 소개") {
+                                    widthVal = isSingleLineDescription ? '560' : '280';
+                                    maxClass = isSingleLineDescription ? 'col-description-single' : 'col-description';
+                                }
+
+                                const vertAlign = (colTarget.config.label === "채널 소개" && isSingleLineDescription) ? 'middle' : 'top';
+                                const whiteSpaceStyle = (colTarget.config.label === "채널 소개" && isSingleLineDescription) ? 'white-space:nowrap;' : 'white-space:pre-line; line-height:1.5;';
+                                const paddingStyle = (colTarget.config.label === "채널 소개" && isSingleLineDescription) ? 'padding:4px 6px;' : 'padding:6px 8px;';
+                                const fSize = (colTarget.config.label === "채널 소개" && isSingleLineDescription) ? '8.5pt' : '10pt';
 
                                 tdStyle = isForEmail
-                                    ? `style="border:1px solid #cccccc; padding:6px 8px; text-align:left; vertical-align:top; white-space:pre-line; line-height:1.5; font-size:10pt; font-weight:normal; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"`
+                                    ? `style="border:1px solid #cccccc; ${paddingStyle} text-align:left; vertical-align:${vertAlign}; ${whiteSpaceStyle} font-size:${fSize}; font-weight:normal; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"`
                                     : '';
-                                cellClass = isForEmail ? '' : `class="align-left ${maxClass}"`;
+                                cellClass = isForEmail ? '' : ((colTarget.config.label === "채널 소개" && isSingleLineDescription) ? `class="align-left-single ${maxClass}"` : `class="align-left ${maxClass}"`);
                                 html += `<td ${tdStyle} ${cellClass}>${formattedVal}</td>`;
                             } else {
                                 html += `<td ${tdStyle} ${cellClass}>${val}</td>`;
@@ -1463,6 +1501,7 @@
 </body>
 
 </html>
+
 
 
 
