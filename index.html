@@ -506,7 +506,7 @@
         #table-output th,
         #table-output td {
             border: 1px solid var(--border-color);
-            padding: 12px 14px;
+            padding: 6px 8px;
             text-align: center;
             vertical-align: middle;
             word-break: keep-all;
@@ -1302,9 +1302,9 @@
             });
 
             const tableStyle = `style="width:${totalWidth}px; border-collapse:collapse; font-size:10pt; font-family:sans-serif; table-layout:fixed;"`;
-            const thStyle = isForEmail ? `style="border:1px solid #cccccc; padding:10px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:middle; font-size:10pt; word-break:keep-all; word-wrap:break-word;" width="${creatorWidthEmail}"` : `class="col-standard" style="width: ${creatorWidthWeb}px;"`;
-            const tdCenterStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; text-align:center; vertical-align:middle; font-size:10pt; font-weight:normal; word-break:keep-all; word-wrap:break-word;"' : '';
-            const tdCreatorStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:10px; text-align:center; vertical-align:middle; font-size:10pt; font-weight:bold; word-break:keep-all; word-wrap:break-word;"' : '';
+            const thStyle = isForEmail ? `style="border:1px solid #cccccc; padding:6px 8px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:middle; font-size:10pt; word-break:keep-all; word-wrap:break-word;" width="${creatorWidthEmail}"` : `class="col-standard" style="width: ${creatorWidthWeb}px;"`;
+            const tdCenterStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:6px 8px; text-align:center; vertical-align:middle; font-size:10pt; font-weight:normal; word-break:keep-all; word-wrap:break-word;"' : '';
+            const tdCreatorStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:6px 8px; text-align:center; vertical-align:middle; font-size:10pt; font-weight:bold; word-break:keep-all; word-wrap:break-word;"' : '';
             const titleStyle = isForEmail ? 'style="font-size:10pt; font-weight:bold; font-family:sans-serif; margin-bottom:10px;"' : 'style="font-size:10pt; font-weight:bold; margin-bottom:10px;"';
 
             let html = `<div ${titleStyle}>[크리에이터 리스트]</div>`;
@@ -1340,7 +1340,7 @@
                     }
                 }
                 const headText = item.type === 'blank' ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : item.config.label;
-                html += `<th ${isForEmail ? 'style="border:1px solid #cccccc; padding:10px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:middle; font-size:10pt; word-break:keep-all; word-wrap:break-word;"' : ''}${thWidthStyle}>${headText}</th>`;
+                html += `<th ${isForEmail ? 'style="border:1px solid #cccccc; padding:6px 8px; background-color:#f2f2f2; font-weight:bold; text-align:center; vertical-align:middle; font-size:10pt; word-break:keep-all; word-wrap:break-word;"' : ''}${thWidthStyle}>${headText}</th>`;
             });
             html += `</tr></thead><tbody>`;
 
@@ -1353,7 +1353,7 @@
                         let tdStyle = tdCenterStyle;
                         if (isLeftAlign) {
                             const widthVal = item.config.label === "채널 소개" ? '260' : '420';
-                            tdStyle = isForEmail ? `style="border:1px solid #cccccc; padding:10px; text-align:left; vertical-align:top; font-size:10pt; font-weight:normal;" width="${widthVal}"` : 'class="align-left"';
+                            tdStyle = isForEmail ? `style="border:1px solid #cccccc; padding:6px 8px; text-align:left; vertical-align:top; font-size:10pt; font-weight:normal;" width="${widthVal}"` : 'class="align-left"';
                         }
                         html += `<td ${tdStyle}>&nbsp;</td>`;
                     });
@@ -1382,7 +1382,7 @@
                                 const maxClass = colTarget.config.label === "채널 소개" ? 'col-description' : 'col-license';
 
                                 tdStyle = isForEmail
-                                    ? `style="border:1px solid #cccccc; padding:10px; text-align:left; vertical-align:top; white-space:pre-line; line-height:1.5; font-size:10pt; font-weight:normal; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"`
+                                    ? `style="border:1px solid #cccccc; padding:6px 8px; text-align:left; vertical-align:top; white-space:pre-line; line-height:1.5; font-size:10pt; font-weight:normal; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"`
                                     : '';
                                 cellClass = isForEmail ? '' : `class="align-left ${maxClass}"`;
                                 html += `<td ${tdStyle} ${cellClass}>${formattedVal}</td>`;
@@ -1463,6 +1463,7 @@
 </body>
 
 </html>
+
 
 
 
