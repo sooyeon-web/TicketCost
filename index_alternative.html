@@ -885,6 +885,9 @@
                         </div>
                     </div>
                     <div class="card-body preview-body">
+                        <div id="external-copy-warning" style="display: none; color: #dc2626; font-size: 13px; font-weight: 600; margin-bottom: 12px; padding: 10px 14px; background-color: #fee2e2; border: 1px solid #fecaca; border-radius: var(--radius-md); text-align: left; line-height: 1.4;">
+                            ⚠️ 외부 크리에이터 단가 추가 설정(가산 단가)이 되었는지 확인해 주세요.
+                        </div>
                         <div class="table-responsive" id="table-output">
                             <p class="placeholder-text">크리에이터와 항목을 선택하면 표가 생성됩니다.</p>
                         </div>
@@ -986,11 +989,22 @@
         }
         function updateWarningBox() {
             const box = document.getElementById('external-warning-box');
-            if (!box) return;
-            if (has12mExternalCreator()) {
-                box.style.display = 'block';
-            } else {
-                box.style.display = 'none';
+            if (box) {
+                if (has12mExternalCreator()) {
+                    box.style.display = 'block';
+                } else {
+                    box.style.display = 'none';
+                }
+            }
+
+            const copyWarning = document.getElementById('external-copy-warning');
+            if (copyWarning) {
+                const hasExternal = selectedRows.some(row => row.dbType === 'external');
+                if (hasExternal) {
+                    copyWarning.style.display = 'block';
+                } else {
+                    copyWarning.style.display = 'none';
+                }
             }
         }
 
@@ -1458,11 +1472,6 @@
 
         function copyToGmail() {
             if (selectedRows.length === 0 || selectedItems.length === 0) return alert('선택된 항목이 없습니다.');
-            if (selectedRows.some(row => row.dbType === 'external')) {
-                if (!confirm("외부 크리에이터가 선택되었습니다. 외부 크리에이터 단가 추가 설정이 되었는지 확인하셨습니까?")) {
-                    return;
-                }
-            }
             const htmlString = generateTableHTML(true);
             const blobHtml = new Blob([htmlString], { type: "text/html" });
             const blobText = new Blob([htmlString.replace(/<[^>]*>/g, '')], { type: "text/plain" });
@@ -1504,11 +1513,6 @@
 
         function copyToText() {
             if (selectedRows.length === 0 || selectedItems.length === 0) return alert('선택된 항목이 없습니다.');
-            if (selectedRows.some(row => row.dbType === 'external')) {
-                if (!confirm("외부 크리에이터가 선택되었습니다. 외부 크리에이터 단가 추가 설정이 되었는지 확인하셨습니까?")) {
-                    return;
-                }
-            }
             
             let plainBlocks = [];
             let htmlBlocks = [];
@@ -1616,6 +1620,7 @@
 </body>
 
 </html>
+
 
 
 
