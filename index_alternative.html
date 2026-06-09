@@ -813,7 +813,6 @@
                             <div id="internal-buttons" class="flex-wrap">
                                 <button class="btn btn-blank" onclick="addBlankCreator()">➕ 공란 행 추가 <span class="order-badge"
                                         id="blank-creator-badge">0</span></button>
-                                <button class="btn btn-blank" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="removeLastBlankCreator()">➖ 공란 행 제거</button>
                             </div>
                         </div>
                     </div>
@@ -1080,14 +1079,6 @@
             blankItemBtn.onclick = () => addBlankItem();
             itemContainer.appendChild(blankItemBtn);
 
-            const removeBlankItemBtn = document.createElement('button');
-            removeBlankItemBtn.className = 'btn btn-blank';
-            removeBlankItemBtn.style.color = '#ef4444';
-            removeBlankItemBtn.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-            removeBlankItemBtn.innerHTML = `➖ 공란 열 제거`;
-            removeBlankItemBtn.onclick = () => removeLastBlankItem();
-            itemContainer.appendChild(removeBlankItemBtn);
-
             itemsConfig.forEach((item, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'btn item-btn';
@@ -1157,17 +1148,6 @@
             renderTable();
         }
 
-        function removeLastBlankCreator() {
-            for (let i = selectedRows.length - 1; i >= 0; i--) {
-                if (selectedRows[i].type === 'blank') {
-                    selectedRows.splice(i, 1);
-                    break;
-                }
-            }
-            updateBadges('creators');
-            renderTable();
-        }
-
         function toggleItem(item, idx, btn) {
             const pos = selectedItems.findIndex(target => target.type === 'real' && target.config.label === item.label);
             if (pos > -1) {
@@ -1184,17 +1164,6 @@
         function addBlankItem() {
             blankItemCounter++;
             selectedItems.push({ type: 'blank', id: blankItemCounter });
-            updateBadges('items');
-            renderTable();
-        }
-
-        function removeLastBlankItem() {
-            for (let i = selectedItems.length - 1; i >= 0; i--) {
-                if (selectedItems[i].type === 'blank') {
-                    selectedItems.splice(i, 1);
-                    break;
-                }
-            }
             updateBadges('items');
             renderTable();
         }
@@ -1637,12 +1606,6 @@
 </body>
 
 </html>
-
-
-
-
-
-
 
 
 
