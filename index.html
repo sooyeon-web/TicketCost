@@ -1001,7 +1001,10 @@
             const copyWarning = document.getElementById('external-copy-warning');
             if (copyWarning) {
                 const hasExternal = selectedRows.some(row => row.dbType === 'external');
-                if (hasExternal) {
+                const adjustInput = document.getElementById('external-price-adjust');
+                const adjustValue = adjustInput ? parseFloat(adjustInput.value) : 0;
+                
+                if (hasExternal && (isNaN(adjustValue) || adjustValue === 0)) {
                     copyWarning.style.display = 'block';
                 } else {
                     copyWarning.style.display = 'none';
@@ -1493,6 +1496,7 @@
         function renderTable() {
             const container = document.getElementById('table-output');
             container.innerHTML = generateTableHTML(false);
+            updateWarningBox();
         }
 
         function showToast() {
@@ -1651,6 +1655,7 @@
 </body>
 
 </html>
+
 
 
 
