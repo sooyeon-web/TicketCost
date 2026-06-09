@@ -1489,6 +1489,11 @@
 
         function copyToGmail() {
             if (selectedRows.length === 0 || selectedItems.length === 0) return alert('선택된 항목이 없습니다.');
+            if (selectedRows.some(row => row.dbType === 'external')) {
+                if (!confirm("외부 크리에이터가 선택되었습니다. 외부 크리에이터 단가 추가 설정이 되었는지 확인하셨습니까?")) {
+                    return;
+                }
+            }
             const htmlString = generateTableHTML(true);
             const blobHtml = new Blob([htmlString], { type: "text/html" });
             const blobText = new Blob([htmlString.replace(/<[^>]*>/g, '')], { type: "text/plain" });
@@ -1530,6 +1535,11 @@
 
         function copyToText() {
             if (selectedRows.length === 0 || selectedItems.length === 0) return alert('선택된 항목이 없습니다.');
+            if (selectedRows.some(row => row.dbType === 'external')) {
+                if (!confirm("외부 크리에이터가 선택되었습니다. 외부 크리에이터 단가 추가 설정이 되었는지 확인하셨습니까?")) {
+                    return;
+                }
+            }
             
             let plainBlocks = [];
             let htmlBlocks = [];
@@ -1637,6 +1647,7 @@
 </body>
 
 </html>
+
 
 
 
