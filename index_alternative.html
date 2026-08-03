@@ -1473,13 +1473,20 @@
             });
             html += `</tbody></table>`;
 
-            const footerStyle = isForEmail ? 'style="margin-top:12px; font-size:10pt; color:#555; font-family:sans-serif; font-weight:normal; line-height:1.5;"' : 'class="table-footer-notice"';
-            html += `<div ${footerStyle}>${noticeText}`;
+            const showNotice = !(selectedItems.every(item => item.type === 'blank' || (item.type === 'real' && item.config.label === "채널 인사이트")) && selectedItems.some(item => item.type === 'real' && item.config.label === "채널 인사이트"));
+            const currentNoticeText = showNotice ? noticeText : "";
             const extraNotices = getDynamicNotices();
-            if (extraNotices.length > 0) {
-                html += `<br>` + extraNotices.join("<br>");
+
+            if (currentNoticeText || extraNotices.length > 0) {
+                const footerStyle = isForEmail ? 'style="margin-top:12px; font-size:10pt; color:#555; font-family:sans-serif; font-weight:normal; line-height:1.5;"' : 'class="table-footer-notice"';
+                html += `<div ${footerStyle}>${currentNoticeText}`;
+                if (currentNoticeText && extraNotices.length > 0) {
+                    html += `<br>` + extraNotices.join("<br>");
+                } else if (extraNotices.length > 0) {
+                    html += extraNotices.join("<br>");
+                }
+                html += `</div>`;
             }
-            html += `</div>`;
 
             return html;
         }
@@ -1644,6 +1651,7 @@
 </body>
 
 </html>
+
 
 
 
