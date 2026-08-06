@@ -480,6 +480,16 @@
             transform: translateY(-0.5px);
         }
 
+        .sort-price {
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+        }
+
+        .sort-price:hover {
+            background: var(--primary-hover);
+            transform: translateY(-0.5px);
+        }
+
         /* Table Design */
         .preview-body {
             flex: 1;
@@ -890,6 +900,7 @@
                         <div class="action-buttons-group">
                             <button class="btn-action copy-gmail" onclick="copyToGmail()">📋 Gmail용 복사 (HTML)</button>
                             <button class="btn-action copy-text" onclick="copyToText()">📝 텍스트 복사 (Tab)</button>
+                            <button class="btn-action sort-price" onclick="sortByHighestPrice()">💰 단가 높은순 정렬</button>
                         </div>
                     </div>
                     <div class="card-body preview-body">
@@ -1699,11 +1710,52 @@
             });
         }
 
+        function parsePriceToNumber(valStr) {
+            if (!valStr || valStr === "-" || valStr === "null") return 0;
+            const cleanStr = String(valStr).replace(/,/g, '');
+            const match = cleanStr.match(/\d+/);
+            return match ? parseInt(match[0], 10) : 0;
+        }
+
+        function sortByHighestPrice() {
+            if (selectedRows.length === 0 || selectedItems.length === 0) {
+                alert('선택된 크리에이터나 항목이 없습니다.');
+                return;
+            }
+
+            const priceKeys = ['bdc', 'planned_ppl', 'shorts', 'reels', 'feed', 'appearance', 'visit_fee', 'regram'];
+            const firstPriceCol = selectedItems.find(item => 
+                item.type === 'real' && priceKeys.includes(item.config.key)
+            );
+
+            if (!firstPriceCol) {
+                alert('단가 항목이 선택되지 않았습니다. (유튜브 브랜디드 콘텐츠, 인스타그램 릴스 등)');
+                return;
+            }
+
+            const getPriceValue = (rowTarget) => {
+                if (rowTarget.type === 'blank') return -1;
+                const creator = rowTarget.dbType === 'internal' ? creatorsData[rowTarget.index] : externalData[rowTarget.index];
+                const val = getValueFromData(creator, firstPriceCol.config, rowTarget.dbType === 'external');
+                return parsePriceToNumber(val);
+            };
+
+            selectedRows.sort((a, b) => {
+                const priceA = getPriceValue(a);
+                const priceB = getPriceValue(b);
+                return priceB - priceA;
+            });
+
+            updateBadges('creators');
+            renderTable();
+        }
+
 
     </script>
 </body>
 
 </html>
+
 
 
 
