@@ -833,12 +833,15 @@
                                 변경됩니다.</span>
                         </div>
                         <div class="card-body">
-                            <select id="external-category-select" class="category-select"
-                                onchange="filterExternalCategory()">
-                                <option value="solojiok">🔥 솔로지옥 시리즈</option>
-                                <option value="transfer">💘 환승연애 시리즈</option>
-                                <option value="heart">💬 기타 연애프로그램</option>
-                            </select>
+                            <div class="external-filter-row" style="display: flex; gap: 8px; margin-bottom: 12px; width: 100%;">
+                                <select id="external-category-select" class="category-select" style="flex: 1; min-width: 0;" onchange="filterExternalCategory()">
+                                    <option value="all">✨ 전체 카테고리</option>
+                                    <option value="solojiok">🔥 솔로지옥 시리즈</option>
+                                    <option value="transfer">💘 환승연애 시리즈</option>
+                                    <option value="heart">💬 기타 연애프로그램</option>
+                                </select>
+                                <input type="text" id="external-search-input" placeholder="🔍 크리에이터 이름/소개 검색..." class="category-select" style="flex: 1; min-width: 0; cursor: text;" oninput="filterExternalCategory()">
+                            </div>
                             <div id="external-buttons-container" class="flex-wrap"></div>
                             <div id="external-warning-box"
                                 style="display: none; color: #dc2626; font-size: 13px; font-weight: 600; margin-top: 12px; padding: 10px 14px; background-color: #fee2e2; border: 1px solid #fecaca; border-radius: var(--radius-md); text-align: left; line-height: 1.4;">
@@ -1073,6 +1076,13 @@
             }
 
             select.innerHTML = '';
+            
+            // 전체 카테고리 옵션 추가
+            const allOption = document.createElement('option');
+            allOption.value = 'all';
+            allOption.textContent = '✨ 전체 카테고리';
+            select.appendChild(allOption);
+
             categories.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
@@ -1136,14 +1146,25 @@
 
         function filterExternalCategory() {
             const select = document.getElementById('external-category-select');
+            const searchInput = document.getElementById('external-search-input');
             if (!select) return;
             const selectedShow = select.value;
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
             const container = document.getElementById('external-buttons-container');
             if (!container) return;
             container.innerHTML = '';
 
             externalData.forEach((c, idx) => {
-                if (c.show === selectedShow) {
+                const matchesCategory = (selectedShow === 'all' || c.show === selectedShow);
+                
+                let matchesSearch = true;
+                if (query !== '') {
+                    const creatorName = (c.creator || '').toLowerCase();
+                    const desc = (c.description || '').toLowerCase();
+                    matchesSearch = creatorName.includes(query) || desc.includes(query);
+                }
+
+                if (matchesCategory && matchesSearch) {
                     const btn = document.createElement('button');
                     const pos = selectedRows.findIndex(item => item.dbType === 'external' && item.index === idx);
 
@@ -1683,6 +1704,7 @@
 </body>
 
 </html>
+
 
 
 
