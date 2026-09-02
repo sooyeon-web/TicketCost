@@ -309,6 +309,12 @@
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
         }
 
+                /* 5. ?쒖븞 ?щ━?먯씠??由ъ뒪??踰꾪듉 ?ㅽ???*/
+        .proposal-btn {
+            font-weight: 600;
+            padding: 9px 16px;
+        }
+
         .btn.active:hover {
             background: var(--primary-hover);
             color: #ffffff;
@@ -1043,6 +1049,141 @@
             { label: "채널 인사이트", group: "direct", key: "channel_insight" }
         ];
 
+        /* =========================================================
+         * 5. ?쒖븞 ?щ━?먯씠??由ъ뒪??紐⑥쓬 ?꾨━???ㅼ젙
+         * ?먰븯???щ━?먯씠???대쫫(?대?/?몃?)??諛곗뿴??異붽??섏뿬 援ъ꽦?????덉뒿?덈떎.
+         * ======================================================= */
+        const proposalPresets = [
+            {
+                id: "rs",
+                label: "RS 媛??梨꾨꼸",
+                creators: ["?뚯뒪??]
+            },
+            {
+                id: "beauty_device",
+                label: "酉고떚 ?붾컮?댁뒪",
+                creators: ["?뚯뒪??]
+            },
+            {
+                id: "inner_beauty",
+                label: "嫄닿린???대꼫酉고떚)",
+                creators: ["?뚯뒪??]
+            },
+            {
+                id: "innerwear",
+                label: "?대꼫?⑥뼱",
+                creators: ["?뚯뒪??]
+            }
+        ];
+
+        let activeProposalId = null;
+
+        function getCreatorFromRow(rowTarget) {
+            if (!rowTarget || rowTarget.type === 'blank') return null;
+            if (rowTarget.dbType === 'internal') return creatorsData[rowTarget.index];
+            if (rowTarget.dbType === 'external') return externalData[rowTarget.index];
+            if (rowTarget.dbType === 'custom') return rowTarget.customData;
+            return null;
+        }
+
+        function findCreatorByName(name) {
+            if (!name) return null;
+            const cleanName = String(name).trim();
+
+            // 1. ?대? ?щ━?먯씠??寃??            const intIdx = creatorsData.findIndex(c => c.creator && c.creator.trim() === cleanName);
+            if (intIdx > -1) {
+                return { dbType: 'internal', type: 'real', index: intIdx };
+            }
+
+            // 2. ?몃? ?щ━?먯씠??寃??            const extIdx = externalData.findIndex(c => c.creator && c.creator.trim() === cleanName);
+            if (extIdx > -1) {
+                return { dbType: 'external', type: 'real', index: extIdx };
+            }
+
+            // 3. ?꾩쓽/?뚯뒪??梨꾨꼸 ?대갚 媛앹껜
+            return {
+                dbType: 'custom',
+                type: 'custom',
+                customData: {
+                    creator: cleanName,
+                    youtube_subscribers: "10留?,
+                    youtube_url: null,
+                    instagram_followers: "5留?,
+                    instagram_url: null,
+                    youtube: { bdc: "1,000", planned_ppl: "700", shorts: "300" },
+                    instagram: { feed: "300", reels: "500", regram: "100" },
+                    appearance: "300",
+                    visit_fee: "100",
+                    license: "- 1媛쒖썡 ?⑤씪???꾨━ ?쇱씠?좎뒪: 300 留뚯썝\n- 釉뚮옖??怨꾩젙 由ш렇?? 50 留뚯썝",
+                    description: [\] ?쒖븞 由ъ뒪???뚯뒪??梨꾨꼸,
+                    channel_insight: "- ?ъ꽦 85% / ?⑥꽦 15%\n- 留?25??34??55%"
+                }
+            };
+        }
+
+        function applyProposalPreset(presetId) {
+            const preset = proposalPresets.find(p => p.id === presetId);
+            if (!preset) return;
+
+            // ?대? ?쒖꽦?붾맂 踰꾪듉???ㅼ떆 ?꾨Ⅴ硫??댁젣 (?좉?)
+            if (activeProposalId === presetId) {
+                resetProposalSelection();
+                return;
+            }
+
+            activeProposalId = presetId;
+
+            // 1. 湲곗〈 ?щ━?먯씠???좏깮 珥덇린??諛??꾨━??紐⑸줉 異붽?
+            selectedRows = [];
+            preset.creators.forEach(name => {
+                const item = findCreatorByName(name);
+                if (item) {
+                    selectedRows.push(item);
+                }
+            });
+
+            // 2. 留뚯빟 ?좏깮????ぉ(?????섎굹???녿떎硫?湲곕낯 ???좏뒠釉?BDC, ?몄뒪?洹몃옩 由댁뒪, 2李??쒖슜) ?먮룞 ?좏깮
+            if (selectedItems.length === 0) {
+                [0, 3, 9].forEach(idx => {
+                    if (itemsConfig[idx]) {
+                        selectedItems.push({ type: 'real', config: itemsConfig[idx], index: idx });
+                    }
+                });
+                const itemBtns = document.querySelectorAll('.item-btn');
+                [0, 3, 9].forEach(idx => {
+                    if (itemBtns[idx]) itemBtns[idx].classList.add('active');
+                });
+                updateBadges('items');
+            }
+
+            // 3. ?꾨━??踰꾪듉 active ?곹깭 媛깆떊
+            document.querySelectorAll('.proposal-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.presetId === presetId);
+            });
+
+            // 4. ?대?/?몃? ?щ━?먯씠??踰꾪듉 active ?곹깭 ?숆린??            document.querySelectorAll('.internal-btn').forEach((btn, idx) => {
+                const isSelected = selectedRows.some(r => r.dbType === 'internal' && r.index === idx);
+                btn.classList.toggle('active', isSelected);
+            });
+            filterExternalCategory();
+
+            updateBadges('creators');
+            updateWarningBox();
+            renderTable();
+            showToast('\' 由ъ뒪?몃? 遺덈윭?붿뒿?덈떎.);
+        }
+
+        function resetProposalSelection() {
+            activeProposalId = null;
+            selectedRows = [];
+            document.querySelectorAll('.proposal-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.internal-btn').forEach(btn => btn.classList.remove('active'));
+            filterExternalCategory();
+            updateBadges('creators');
+            updateWarningBox();
+            renderTable();
+        }
+
         let selectedRows = [];
         let selectedItems = [];
         let blankCreatorCounter = 0;
@@ -1133,6 +1274,10 @@
         }
 
         function toggleRowSelection(dbType, idx, btn) {
+            if (activeProposalId) {
+                activeProposalId = null;
+                document.querySelectorAll('.proposal-btn').forEach(b => b.classList.remove('active'));
+            }
             const pos = selectedRows.findIndex(item => item.dbType === dbType && item.index === idx);
             if (pos > -1) {
                 selectedRows.splice(pos, 1);
@@ -1450,7 +1595,7 @@
                         html += `<td ${tdStyle}>&nbsp;</td>`;
                     });
                 } else {
-                    const creator = rowTarget.dbType === 'internal' ? creatorsData[rowTarget.index] : externalData[rowTarget.index];
+                    const creator = getCreatorFromRow(rowTarget);
                     const link = getDynamicLink(creator, selectedItems);
                     const linkStyle = isForEmail ? 'style="color:#007bff; text-decoration:none; font-weight:bold; font-size:10pt;"' : '';
                     if (link !== "#") {
@@ -1590,7 +1735,7 @@
                     return;
                 }
 
-                const creator = rowTarget.dbType === 'internal' ? creatorsData[rowTarget.index] : externalData[rowTarget.index];
+                const creator = getCreatorFromRow(rowTarget);
                 const isHaeunRow = (rowTarget.dbType === 'internal' && rowTarget.index === 0);
                 
                 let plainLines = [];
@@ -1704,7 +1849,7 @@
 
             const getPriceValue = (rowTarget) => {
                 if (rowTarget.type === 'blank') return -1;
-                const creator = rowTarget.dbType === 'internal' ? creatorsData[rowTarget.index] : externalData[rowTarget.index];
+                const creator = getCreatorFromRow(rowTarget);
                 const val = getValueFromData(creator, firstPriceCol.config, rowTarget.dbType === 'external');
                 return parsePriceToNumber(val);
             };
@@ -1724,6 +1869,7 @@
 </body>
 
 </html>
+
 
 
 
