@@ -1050,29 +1050,29 @@
         ];
 
         /* =========================================================
-         * 5. ?쒖븞 ?щ━?먯씠??由ъ뒪??紐⑥쓬 ?꾨━???ㅼ젙
-         * ?먰븯???щ━?먯씠???대쫫(?대?/?몃?)??諛곗뿴??異붽??섏뿬 援ъ꽦?????덉뒿?덈떎.
+         * 5. 제안 크리에이터 리스트 모음 프리셋 설정
+         * 원하는 크리에이터 이름(내부/외부)을 배열에 추가하여 구성할 수 있습니다.
          * ======================================================= */
         const proposalPresets = [
             {
                 id: "rs",
-                label: "RS 媛??梨꾨꼸",
-                creators: ["?뚯뒪??]
+                label: "RS 가능 채널",
+                creators: ["테스트"]
             },
             {
                 id: "beauty_device",
-                label: "酉고떚 ?붾컮?댁뒪",
-                creators: ["?뚯뒪??]
+                label: "뷰티 디바이스",
+                creators: ["테스트"]
             },
             {
                 id: "inner_beauty",
-                label: "嫄닿린???대꼫酉고떚)",
-                creators: ["?뚯뒪??]
+                label: "건기식(이너뷰티)",
+                creators: ["테스트"]
             },
             {
                 id: "innerwear",
-                label: "?대꼫?⑥뼱",
-                creators: ["?뚯뒪??]
+                label: "이너웨어",
+                creators: ["테스트"]
             }
         ];
 
@@ -1090,33 +1090,35 @@
             if (!name) return null;
             const cleanName = String(name).trim();
 
-            // 1. ?대? ?щ━?먯씠??寃??            const intIdx = creatorsData.findIndex(c => c.creator && c.creator.trim() === cleanName);
+            // 1. 내부 크리에이터 검색
+            const intIdx = creatorsData.findIndex(c => c.creator && c.creator.trim() === cleanName);
             if (intIdx > -1) {
                 return { dbType: 'internal', type: 'real', index: intIdx };
             }
 
-            // 2. ?몃? ?щ━?먯씠??寃??            const extIdx = externalData.findIndex(c => c.creator && c.creator.trim() === cleanName);
+            // 2. 외부 크리에이터 검색
+            const extIdx = externalData.findIndex(c => c.creator && c.creator.trim() === cleanName);
             if (extIdx > -1) {
                 return { dbType: 'external', type: 'real', index: extIdx };
             }
 
-            // 3. ?꾩쓽/?뚯뒪??梨꾨꼸 ?대갚 媛앹껜
+            // 3. 임의/테스트 채널 폴백 객체
             return {
                 dbType: 'custom',
                 type: 'custom',
                 customData: {
                     creator: cleanName,
-                    youtube_subscribers: "10留?,
+                    youtube_subscribers: "10만",
                     youtube_url: null,
-                    instagram_followers: "5留?,
+                    instagram_followers: "5만",
                     instagram_url: null,
                     youtube: { bdc: "1,000", planned_ppl: "700", shorts: "300" },
                     instagram: { feed: "300", reels: "500", regram: "100" },
                     appearance: "300",
                     visit_fee: "100",
-                    license: "- 1媛쒖썡 ?⑤씪???꾨━ ?쇱씠?좎뒪: 300 留뚯썝\n- 釉뚮옖??怨꾩젙 由ш렇?? 50 留뚯썝",
-                    description: [\] ?쒖븞 由ъ뒪???뚯뒪??梨꾨꼸,
-                    channel_insight: "- ?ъ꽦 85% / ?⑥꽦 15%\n- 留?25??34??55%"
+                    license: "- 1개월 온라인 프리 라이선스: 300 만원\n- 브랜드 계정 리그램: 50 만원",
+                    description: `[${cleanName}] 제안 리스트 테스트 채널`,
+                    channel_insight: "- 여성 85% / 남성 15%\n- 만 25세-34세 55%"
                 }
             };
         }
@@ -1125,7 +1127,7 @@
             const preset = proposalPresets.find(p => p.id === presetId);
             if (!preset) return;
 
-            // ?대? ?쒖꽦?붾맂 踰꾪듉???ㅼ떆 ?꾨Ⅴ硫??댁젣 (?좉?)
+            // 이미 활성화된 버튼을 다시 누르면 해제 (토글)
             if (activeProposalId === presetId) {
                 resetProposalSelection();
                 return;
@@ -1133,7 +1135,7 @@
 
             activeProposalId = presetId;
 
-            // 1. 湲곗〈 ?щ━?먯씠???좏깮 珥덇린??諛??꾨━??紐⑸줉 異붽?
+            // 1. 기존 크리에이터 선택 초기화 및 프리셋 목록 추가
             selectedRows = [];
             preset.creators.forEach(name => {
                 const item = findCreatorByName(name);
@@ -1142,7 +1144,7 @@
                 }
             });
 
-            // 2. 留뚯빟 ?좏깮????ぉ(?????섎굹???녿떎硫?湲곕낯 ???좏뒠釉?BDC, ?몄뒪?洹몃옩 由댁뒪, 2李??쒖슜) ?먮룞 ?좏깮
+            // 2. 만약 선택된 항목(열)이 하나도 없다면 기본 열(유튜브 BDC, 인스타그램 릴스, 2차 활용) 자동 선택
             if (selectedItems.length === 0) {
                 [0, 3, 9].forEach(idx => {
                     if (itemsConfig[idx]) {
@@ -1156,12 +1158,13 @@
                 updateBadges('items');
             }
 
-            // 3. ?꾨━??踰꾪듉 active ?곹깭 媛깆떊
+            // 3. 프리셋 버튼 active 상태 갱신
             document.querySelectorAll('.proposal-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.presetId === presetId);
             });
 
-            // 4. ?대?/?몃? ?щ━?먯씠??踰꾪듉 active ?곹깭 ?숆린??            document.querySelectorAll('.internal-btn').forEach((btn, idx) => {
+            // 4. 내부/외부 크리에이터 버튼 active 상태 동기화
+            document.querySelectorAll('.internal-btn').forEach((btn, idx) => {
                 const isSelected = selectedRows.some(r => r.dbType === 'internal' && r.index === idx);
                 btn.classList.toggle('active', isSelected);
             });
@@ -1170,7 +1173,7 @@
             updateBadges('creators');
             updateWarningBox();
             renderTable();
-            showToast('\' 由ъ뒪?몃? 遺덈윭?붿뒿?덈떎.);
+            showToast(`'${preset.label}' 리스트를 불러왔습니다.`);
         }
 
         function resetProposalSelection() {
@@ -1271,6 +1274,20 @@
                 btn.onclick = () => toggleItem(item, idx, btn);
                 itemContainer.appendChild(btn);
             });
+
+            // 5. 제안 크리에이터 리스트 버튼 렌더링
+            const proposalContainer = document.getElementById('proposal-buttons');
+            if (proposalContainer) {
+                proposalContainer.innerHTML = '';
+                proposalPresets.forEach(preset => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn proposal-btn';
+                    btn.dataset.presetId = preset.id;
+                    btn.textContent = preset.label;
+                    btn.onclick = () => applyProposalPreset(preset.id);
+                    proposalContainer.appendChild(btn);
+                });
+            }
         }
 
         function toggleRowSelection(dbType, idx, btn) {
@@ -1869,6 +1886,7 @@
 </body>
 
 </html>
+
 
 
 
