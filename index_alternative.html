@@ -496,6 +496,16 @@
             transform: translateY(-0.5px);
         }
 
+        .reset-all {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            box-shadow: 0 4px 10px rgba(71, 85, 105, 0.2);
+        }
+
+        .reset-all:hover {
+            background: #334155;
+            transform: translateY(-0.5px);
+        }
+
         /* Table Design */
         .preview-body {
             flex: 1;
@@ -920,6 +930,7 @@
                             <button class="btn-action copy-gmail" onclick="copyToGmail()">📋 Gmail용 복사 (HTML)</button>
                             <button class="btn-action copy-text" onclick="copyToText()">📝 텍스트 복사 (Tab)</button>
                             <button class="btn-action sort-price" onclick="sortByHighestPrice()">💰 단가 높은순 정렬</button>
+                            <button class="btn-action reset-all" onclick="resetAll()">🔄 전체 초기화</button>
                         </div>
                     </div>
                     <div class="card-body preview-body">
@@ -1451,6 +1462,25 @@
             renderTable();
         }
 
+        function resetAll() {
+            selectedRows = [];
+            selectedItems = [];
+            blankCreatorCounter = 0;
+            blankItemCounter = 0;
+            activeProposalId = null;
+
+            document.querySelectorAll('.internal-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.proposal-btn').forEach(b => b.classList.remove('active'));
+            filterExternalCategory();
+
+            updateBadges('creators');
+            updateBadges('items');
+            updateWarningBox();
+            renderTable();
+            showToast('전체 선택이 초기화되었습니다.');
+        }
+
         function getDynamicLink(creator, currentItems) {
             const hasYoutube = currentItems.some(i => i.type === 'real' && i.config.label.includes('유튜브'));
             const hasInsta = currentItems.some(i => i.type === 'real' && i.config.label.includes('인스타'));
@@ -1917,6 +1947,7 @@
 </body>
 
 </html>
+
 
 
 
