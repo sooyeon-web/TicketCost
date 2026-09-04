@@ -1072,22 +1072,26 @@
             {
                 id: "rs",
                 label: "RS 가능 채널",
-                creators: ["테스트"]
+                creators: ["테스트"],
+                notices: []
             },
             {
                 id: "beauty_device",
                 label: "뷰티 디바이스",
-                creators: ["테스트"]
+                creators: ["로지", "김여명", "함예진", "윤하정", "최혜선", "이지연", "유이수"],
+                notices: ["- 뷰티 디바이스는 제품과 브랜드에 따라 논의"]
             },
             {
                 id: "inner_beauty",
                 label: "건기식(이너뷰티)",
-                creators: ["테스트"]
+                creators: ["테스트"],
+                notices: []
             },
             {
                 id: "innerwear",
                 label: "이너웨어",
-                creators: ["테스트"]
+                creators: ["테스트"],
+                notices: []
             }
         ];
 
@@ -1552,6 +1556,19 @@
             if (hasRegram) {
                 notices.push("- 스토리 리그램 : 링크 1개 삽입, 기존 게시글 리그램 기준 (별도 제작 필요시 증액)");
             }
+
+            // 활성화된 제안 프리셋 추가 유의 문구 연동
+            if (activeProposalId) {
+                const activePreset = proposalPresets.find(p => p.id === activeProposalId);
+                if (activePreset && activePreset.notices && activePreset.notices.length > 0) {
+                    activePreset.notices.forEach(n => {
+                        if (!notices.includes(n)) {
+                            notices.push(n);
+                        }
+                    });
+                }
+            }
+
             return notices;
         }
 
@@ -1931,6 +1948,7 @@
 </body>
 
 </html>
+
 
 
 
