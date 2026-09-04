@@ -1163,19 +1163,19 @@
                 }
             });
 
-            // 2. 만약 선택된 항목(열)이 하나도 없다면 기본 열(유튜브 BDC, 인스타그램 릴스, 2차 활용) 자동 선택
-            if (selectedItems.length === 0) {
-                [0, 3, 9].forEach(idx => {
-                    if (itemsConfig[idx]) {
-                        selectedItems.push({ type: 'real', config: itemsConfig[idx], index: idx });
-                    }
-                });
-                const itemBtns = document.querySelectorAll('.item-btn');
-                [0, 3, 9].forEach(idx => {
-                    if (itemBtns[idx]) itemBtns[idx].classList.add('active');
-                });
-                updateBadges('items');
-            }
+            // 2. 항목(열)을 제안 기본 열(유튜브 브랜디드, 유튜브 기획 PPL, 인스타그램 릴스, 채널 소개)로 설정
+            selectedItems = [];
+            const defaultProposalItemIndexes = [0, 1, 3, 8];
+            defaultProposalItemIndexes.forEach(idx => {
+                if (itemsConfig[idx]) {
+                    selectedItems.push({ type: 'real', config: itemsConfig[idx], index: idx });
+                }
+            });
+            const itemBtns = document.querySelectorAll('.item-btn');
+            itemBtns.forEach((btn, idx) => {
+                btn.classList.toggle('active', defaultProposalItemIndexes.includes(idx));
+            });
+            updateBadges('items');
 
             // 3. 프리셋 버튼 active 상태 갱신
             document.querySelectorAll('.proposal-btn').forEach(btn => {
@@ -1948,6 +1948,7 @@
 </body>
 
 </html>
+
 
 
 
