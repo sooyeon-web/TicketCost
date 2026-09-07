@@ -486,6 +486,16 @@
             transform: translateY(-0.5px);
         }
 
+        .copy-image {
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
+        }
+
+        .copy-image:hover {
+            background: linear-gradient(135deg, #d97706 0%, #c2410c 100%);
+            transform: translateY(-0.5px);
+        }
+
         .sort-price {
             background: var(--primary-gradient);
             box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
@@ -590,6 +600,66 @@
             font-size: 11px;
             padding: 4px 6px;
             color: var(--text-secondary);
+        }
+
+        /* Row Control Styles (Web preview only) */
+        .creator-cell-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: #94a3b8;
+            font-size: 13px;
+            user-select: none;
+            transition: color 0.15s;
+            line-height: 1;
+            padding: 2px;
+        }
+
+        .drag-handle:hover {
+            color: #475569;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .row-delete-btn {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            line-height: 1;
+            transition: all 0.15s;
+        }
+
+        .row-delete-btn:hover {
+            color: #ef4444;
+            background-color: #fee2e2;
+        }
+
+        .table-row-item.is-dragging {
+            opacity: 0.4;
+            background-color: #f1f5f9;
+        }
+
+        .table-row-item.drag-over td {
+            border-top: 2px solid #4f46e5 !important;
+        }
+
+        /* Image capture mode: hide controls cleanly */
+        .is-capturing .drag-handle,
+        .is-capturing .row-delete-btn {
+            display: none !important;
         }
 
         /* Table Footer Notices */
@@ -800,6 +870,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 
 <body style="display: none;">
@@ -935,6 +1006,7 @@
                         <div class="action-buttons-group">
                             <button class="btn-action copy-gmail" onclick="copyToGmail()">📋 Gmail용 복사 (HTML)</button>
                             <button class="btn-action copy-text" onclick="copyToText()">📝 텍스트 복사 (Tab)</button>
+                            <button class="btn-action copy-image" onclick="copyToImage()">📸 표 이미지 복사</button>
                             <button class="btn-action sort-price" onclick="sortByHighestPrice()">💰 단가 높은순 정렬</button>
                             <button class="btn-action reset-all" onclick="resetAll()">🔄 전체 초기화</button>
                         </div>
@@ -1644,7 +1716,8 @@
             const tdCreatorStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:6px 8px; text-align:center; vertical-align:middle; font-size:10pt; font-weight:bold; word-break:keep-all; word-wrap:break-word;"' : '';
             const titleStyle = isForEmail ? 'style="font-size:10pt; font-weight:bold; font-family:sans-serif; margin-bottom:10px;"' : 'style="font-size:10pt; font-weight:bold; margin-bottom:10px;"';
 
-            let html = `<div ${titleStyle}>[크리에이터 리스트]</div>`;
+            let html = isForEmail ? '' : `<div id="capture-target" style="display:inline-block; background:#ffffff; padding:12px 14px; width:max-content; min-width:${totalWidth}px;">`;
+            html += `<div ${titleStyle}>[크리에이터 리스트]</div>`;
             html += `<table ${tableStyle}>`;
 
             // 🌟 헤더(제목 행) 고정 폭 인라인 및 클래스 주입
@@ -1693,10 +1766,21 @@
             });
             html += `</tr></thead><tbody>`;
 
-            selectedRows.forEach(rowTarget => {
-                html += `<tr>`;
+            selectedRows.forEach((rowTarget, rIdx) => {
+                const trAttrs = isForEmail ? '' : `class="table-row-item" draggable="true" ondragstart="handleRowDragStart(event, ${rIdx})" ondragover="handleRowDragOver(event)" ondragleave="handleRowDragLeave(event)" ondrop="handleRowDrop(event, ${rIdx})" ondragend="handleRowDragEnd(event)" data-row-index="${rIdx}"`;
+                html += `<tr ${trAttrs}>`;
                 if (rowTarget.type === 'blank') {
-                    html += `<td ${tdCenterStyle}>&nbsp;</td>`;
+                    let blankCellContent = '&nbsp;';
+                    if (!isForEmail) {
+                        blankCellContent = `
+                            <div class="creator-cell-wrapper">
+                                <span class="drag-handle" title="드래그하여 순서 변경">⋮⋮</span>
+                                <span style="color:#94a3b8; font-size:11px;">(공란)</span>
+                                <button class="row-delete-btn" onclick="removeRowByIndex(${rIdx}, event)" title="행 삭제">✕</button>
+                            </div>
+                        `;
+                    }
+                    html += `<td ${tdCenterStyle}>${blankCellContent}</td>`;
                     selectedItems.forEach(item => {
                         const isLeftAlign = (item.type === 'real' && (item.config.label === "채널 소개" || item.config.label === "2차 활용" || item.config.label === "채널 인사이트"));
                         let tdStyle = tdCenterStyle;
@@ -1715,10 +1799,23 @@
                     const creator = getCreatorFromRow(rowTarget);
                     const link = getDynamicLink(creator, selectedItems);
                     const linkStyle = isForEmail ? 'style="color:#007bff; text-decoration:none; font-weight:bold; font-size:10pt;"' : '';
+                    let creatorHtml = '';
                     if (link !== "#") {
-                        html += `<td ${isForEmail ? tdCreatorStyle : tdCenterStyle}><a href="${link}" target="_blank" ${linkStyle}>${creator.creator}</a></td>`;
+                        creatorHtml = `<a href="${link}" target="_blank" ${linkStyle}>${creator.creator}</a>`;
                     } else {
-                        html += `<td ${isForEmail ? tdCreatorStyle : tdCenterStyle}>${creator.creator}</td>`;
+                        creatorHtml = `${creator.creator}`;
+                    }
+
+                    if (!isForEmail) {
+                        html += `<td ${tdCenterStyle}>
+                            <div class="creator-cell-wrapper">
+                                <span class="drag-handle" title="드래그하여 순서 변경">⋮⋮</span>
+                                <span>${creatorHtml}</span>
+                                <button class="row-delete-btn" onclick="removeRowByIndex(${rIdx}, event)" title="행 삭제">✕</button>
+                            </div>
+                        </td>`;
+                    } else {
+                        html += `<td ${tdCreatorStyle}>${creatorHtml}</td>`;
                     }
 
                     selectedItems.forEach(colTarget => {
@@ -1788,6 +1885,10 @@
                 html += `</div>`;
             }
 
+            if (!isForEmail) {
+                html += `</div>`;
+            }
+
             return html;
         }
 
@@ -1797,10 +1898,157 @@
             updateWarningBox();
         }
 
-        function showToast() {
+        function showToast(msg) {
             const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = msg || '복사되었습니다!';
             toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+            if (toast._timer) clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function removeRowByIndex(rIdx, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            if (rIdx < 0 || rIdx >= selectedRows.length) return;
+
+            const removed = selectedRows.splice(rIdx, 1)[0];
+
+            if (removed.dbType === 'internal') {
+                const internalBtns = document.querySelectorAll('.internal-btn');
+                if (internalBtns[removed.index]) {
+                    internalBtns[removed.index].classList.remove('active');
+                }
+            } else if (removed.dbType === 'external') {
+                filterExternalCategory();
+            }
+
+            updateBadges('creators');
+            updateWarningBox();
+            renderTable();
+            showToast('행이 삭제되었습니다.');
+        }
+
+        let draggedRowIndex = null;
+
+        function handleRowDragStart(e, index) {
+            draggedRowIndex = index;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', index);
+            const tr = e.target.closest('tr');
+            if (tr) {
+                tr.classList.add('is-dragging');
+            }
+        }
+
+        function handleRowDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const tr = e.target.closest('tr');
+            if (tr && !tr.classList.contains('is-dragging')) {
+                tr.classList.add('drag-over');
+            }
+        }
+
+        function handleRowDragLeave(e) {
+            const tr = e.target.closest('tr');
+            if (tr) {
+                tr.classList.remove('drag-over');
+            }
+        }
+
+        function handleRowDrop(e, targetIndex) {
+            e.preventDefault();
+            const tr = e.target.closest('tr');
+            if (tr) {
+                tr.classList.remove('drag-over');
+            }
+
+            if (draggedRowIndex === null || draggedRowIndex === targetIndex) return;
+
+            const movedItem = selectedRows.splice(draggedRowIndex, 1)[0];
+            selectedRows.splice(targetIndex, 0, movedItem);
+
+            draggedRowIndex = null;
+            updateBadges('creators');
+            renderTable();
+            showToast('행 순서가 변경되었습니다.');
+        }
+
+        function handleRowDragEnd(e) {
+            draggedRowIndex = null;
+            document.querySelectorAll('#table-output tr').forEach(row => {
+                row.classList.remove('is-dragging', 'drag-over');
+            });
+        }
+
+        function copyToImage() {
+            if (selectedRows.length === 0 || selectedItems.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            if (typeof html2canvas === 'undefined') {
+                alert('html2canvas 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
+            const targetElement = document.getElementById('capture-target');
+            if (!targetElement) {
+                alert('복사할 표가 없습니다.');
+                return;
+            }
+
+            targetElement.classList.add('is-capturing');
+
+            html2canvas(targetElement, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                targetElement.classList.remove('is-capturing');
+
+                canvas.toBlob(blob => {
+                    if (!blob) {
+                        alert('이미지 생성에 실패했습니다.');
+                        return;
+                    }
+
+                    if (navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+                        const item = new ClipboardItem({ 'image/png': blob });
+                        navigator.clipboard.write([item]).then(() => {
+                            showToast('📸 표 이미지가 복사되었습니다! (카톡에 Ctrl+V)');
+                        }).catch(err => {
+                            console.warn('ClipboardItem write failed, fallback to download:', err);
+                            downloadImageBlob(blob);
+                        });
+                    } else {
+                        downloadImageBlob(blob);
+                    }
+                }, 'image/png');
+            }).catch(err => {
+                targetElement.classList.remove('is-capturing');
+                console.error('html2canvas capture error:', err);
+                alert('이미지 캡처 중 오류가 발생했습니다: ' + err.message);
+            });
+        }
+
+        function downloadImageBlob(blob) {
+            const a = document.createElement('a');
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+            a.href = URL.createObjectURL(blob);
+            a.download = `크리에이터_단가표_${dateStr}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            showToast('이미지 파일로 다운로드되었습니다.');
         }
 
         function copyToGmail() {
@@ -1991,6 +2239,7 @@
 </body>
 
 </html>
+
 
 
 
