@@ -438,7 +438,7 @@
         .preview-header {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
         @media (min-width: 640px) {
@@ -446,24 +446,41 @@
                 flex-direction: row;
                 justify-content: space-between;
                 align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
             }
+        }
+
+        .preview-header h2 {
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin: 0;
         }
 
         .action-buttons-group {
             display: flex;
-            gap: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
         }
 
         .btn-action {
             font-family: inherit;
-            padding: 10px 18px;
-            font-size: 14px;
+            padding: 8px 12px;
+            font-size: 13px;
             font-weight: 700;
             border: none;
             border-radius: var(--radius-md);
             cursor: pointer;
             transition: all 0.2s;
             color: #ffffff;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            line-height: 1.2;
+            flex-shrink: 0;
         }
 
         .copy-gmail {
@@ -1004,9 +1021,9 @@
                     <div class="card-header preview-header">
                         <h2>실시간 미리보기</h2>
                         <div class="action-buttons-group">
-                            <button class="btn-action copy-gmail" onclick="copyToGmail()">📋 Gmail용 복사 (HTML)</button>
-                            <button class="btn-action copy-text" onclick="copyToText()">📝 텍스트 복사 (Tab)</button>
-                            <button class="btn-action copy-image" onclick="copyToImage()">📸 표 이미지 복사</button>
+                            <button class="btn-action copy-gmail" onclick="copyToGmail()">📋 메일용 복사</button>
+                            <button class="btn-action copy-text" onclick="copyToText()">📝 텍스트 복사</button>
+                            <button class="btn-action copy-image" onclick="copyToImage()">📸 이미지 복사</button>
                             <button class="btn-action sort-price" onclick="sortByHighestPrice()">💰 단가 높은순 정렬</button>
                             <button class="btn-action reset-all" onclick="resetAll()">🔄 전체 초기화</button>
                         </div>
@@ -2239,6 +2256,7 @@
 </body>
 
 </html>
+
 
 
 
