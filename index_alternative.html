@@ -571,7 +571,8 @@
         }
 
         .col-rs {
-            width: 300px;
+            width: 440px;
+            white-space: nowrap;
         }
 
         #table-output td.align-left {
@@ -1629,7 +1630,7 @@
                 } else if (item.config.label === "채널 인사이트") {
                     totalWidth += isForEmail ? 380 : 400;
                 } else if (item.config.label === "RS 진행 기준") {
-                    totalWidth += isForEmail ? 280 : 300;
+                    totalWidth += isForEmail ? 400 : 440;
                 } else if (item.config.label === "비고") {
                     totalWidth += isForEmail ? 160 : 180;
                 } else {
@@ -1659,7 +1660,7 @@
                         } else if (item.config.label === "채널 인사이트") {
                             thWidthStyle = ' width="380"';
                         } else if (item.config.label === "RS 진행 기준") {
-                            thWidthStyle = ' width="280"';
+                            thWidthStyle = ' width="400"';
                         } else if (item.config.label === "비고") {
                             thWidthStyle = ' width="160"';
                         } else {
@@ -1677,7 +1678,7 @@
                         } else if (item.config.label === "채널 인사이트") {
                             thWidthStyle = ' class="col-insight"';
                         } else if (item.config.label === "RS 진행 기준") {
-                            thWidthStyle = ' class="col-rs" style="width: 300px;"';
+                            thWidthStyle = ' class="col-rs" style="width: 440px;"';
                         } else if (item.config.label === "비고") {
                             thWidthStyle = ' class="col-standard" style="width: 180px;"';
                         } else {
@@ -1758,6 +1759,11 @@
                                 cellClass = isForEmail ? '' : ((colTarget.config.label === "채널 소개" && isSingleLineDescription) ? `class="align-left-single ${maxClass}"` : `class="align-left ${maxClass}"`);
                                 html += `<td ${tdStyle} ${cellClass}>${formattedVal}</td>`;
                             } else {
+                                const isRsCol = (colTarget.config.label === "RS 진행 기준");
+                                if (isRsCol) {
+                                    tdStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:6px 8px; text-align:center; vertical-align:middle; font-size:10pt; font-weight:normal; white-space:nowrap;" width="400"' : 'style="white-space:nowrap;"';
+                                    cellClass = isForEmail ? '' : 'class="col-rs"';
+                                }
                                 html += `<td ${tdStyle} ${cellClass}>${String(val).replace(/\n/g, '<br>')}</td>`;
                             }
                         }
@@ -1985,6 +1991,7 @@
 </body>
 
 </html>
+
 
 
 
