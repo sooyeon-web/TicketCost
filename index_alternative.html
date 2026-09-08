@@ -1942,8 +1942,8 @@
             });
             html += `</tbody></table>`;
 
-            const nonPriceLabels = ["채널 인사이트", "주소"];
-            const onlyNonPrice = selectedItems.length > 0 && selectedItems.every(item => item.type === 'blank' || (item.type === 'real' && nonPriceLabels.includes(item.config.label)));
+            const nonPriceKeys = ["channel_insight", "address"];
+            const onlyNonPrice = selectedItems.length > 0 && selectedItems.every(item => item.type === 'blank' || (item.type === 'real' && nonPriceKeys.includes(item.config.key)));
             const showNotice = !onlyNonPrice;
             const currentNoticeText = showNotice ? noticeText : "";
             const extraNotices = getDynamicNotices();
@@ -2326,6 +2326,7 @@
 </body>
 
 </html>
+
 
 
 
