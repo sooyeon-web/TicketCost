@@ -603,7 +603,8 @@
         }
 
         .col-address {
-            width: 440px;
+            width: 820px;
+            white-space: nowrap;
         }
 
         #table-output td.align-left {
@@ -1174,7 +1175,7 @@
             { label: "채널 인사이트", group: "direct", key: "channel_insight" },
             { label: "RS 진행 기준", btnLabel: "RS", group: "direct", key: "rs" },
             { label: "비고", btnLabel: "비고", group: "direct", key: "note" },
-            { label: "주소", group: "direct", key: "address" }
+            { label: "배송정보", btnLabel: "주소", group: "direct", key: "address" }
         ];
 
         /* =========================================================
@@ -1705,7 +1706,7 @@
                 notices.push("* 본 정보는, 크리에이터에게 협찬 현물을 직접 전달하기 위한 목적으로만 활용하여야 하며 해당 목적 외로 활용하거나 제3자에게 개인정보 처리업무를 양도, 재위탁 하여서는 아니됩니다. 또한 전달 목적을 달성한 이후에는 즉시 개인정보 및 정보가 포함된 이메일을 파기하여야 하며, 파기한 이후 이를 통보하여 주시기 바랍니다. 이를 위반하여 개인정보주체 기타 제3자에게 손해가 발생한 경우 직접 손해를 배상하여야 합니다.");
                 notices.push("* 크리에이터 보안 이슈로 배송품 겉면에는 크리에이터 이름 기재 없이 배송 부탁드립니다.");
                 if (hasHaeun) {
-                    notices.push("*비고: 보안 이슈가 있다보니 상자 및 겉면에 해피해은/ 성해은 이름 없이 김지수로 표기하여 배송을 부탁드립니다.");
+                    notices.push('<span style="color: #ef4444; font-weight: bold;">* 비고: 보안 이슈가 있다보니 상자 및 겉면에 해피해은/ 성해은 이름 없이 김지수로 표기하여 배송을 부탁드립니다.</span>');
                 }
             }
 
@@ -1759,8 +1760,8 @@
                     totalWidth += isForEmail ? 400 : 440;
                 } else if (item.config.label === "비고") {
                     totalWidth += isForEmail ? 160 : 180;
-                } else if (item.config.label === "주소") {
-                    totalWidth += isForEmail ? 400 : 440;
+                } else if (item.config.key === "address") {
+                    totalWidth += isForEmail ? 780 : 820;
                 } else {
                     totalWidth += isForEmail ? standardWidthEmail : standardWidthWeb;
                 }
@@ -1772,8 +1773,12 @@
             const tdCreatorStyle = isForEmail ? 'style="border:1px solid #cccccc; padding:6px 8px; text-align:center; vertical-align:middle; font-size:10pt; font-weight:bold; word-break:keep-all; word-wrap:break-word;"' : '';
             const titleStyle = isForEmail ? 'style="font-size:10pt; font-weight:bold; font-family:sans-serif; margin-bottom:10px;"' : 'style="font-size:10pt; font-weight:bold; margin-bottom:10px;"';
 
+            const isOnlyAddress = selectedItems.length > 0 && selectedItems.every(item => item.type === 'blank' || (item.type === 'real' && item.config.key === 'address'));
+
             let html = isForEmail ? '' : `<div id="capture-target" style="display:inline-block; background:#ffffff; padding:12px 14px; width:max-content; min-width:${totalWidth}px;">`;
-            html += `<div ${titleStyle}>[크리에이터 리스트]</div>`;
+            if (!isOnlyAddress) {
+                html += `<div ${titleStyle}>[크리에이터 리스트]</div>`;
+            }
             html += `<table ${tableStyle}>`;
 
             // 🌟 헤더(제목 행) 고정 폭 인라인 및 클래스 주입
@@ -1792,8 +1797,8 @@
                             thWidthStyle = ' width="400"';
                         } else if (item.config.label === "비고") {
                             thWidthStyle = ' width="160"';
-                        } else if (item.config.label === "주소") {
-                            thWidthStyle = ' width="400"';
+                        } else if (item.config.key === "address") {
+                            thWidthStyle = ' width="780"';
                         } else {
                             thWidthStyle = ` width="${standardWidthEmail}"`;
                         }
@@ -1812,7 +1817,7 @@
                             thWidthStyle = ' class="col-rs" style="width: 440px;"';
                         } else if (item.config.label === "비고") {
                             thWidthStyle = ' class="col-standard" style="width: 180px;"';
-                        } else if (item.config.label === "주소") {
+                        } else if (item.config.key === "address") {
                             thWidthStyle = ' class="col-address"';
                         } else {
                             thWidthStyle = ` class="col-standard" style="width: ${standardWidthWeb}px;"`;
@@ -1842,7 +1847,7 @@
                     }
                     html += `<td ${tdCenterStyle}>${blankCellContent}</td>`;
                     selectedItems.forEach(item => {
-                        const isLeftAlign = (item.type === 'real' && (item.config.label === "채널 소개" || item.config.label === "2차 활용" || item.config.label === "채널 인사이트" || item.config.label === "주소"));
+                        const isLeftAlign = (item.type === 'real' && (item.config.label === "채널 소개" || item.config.label === "2차 활용" || item.config.label === "채널 인사이트" || item.config.key === "address"));
                         let tdStyle = tdCenterStyle;
                         if (isLeftAlign) {
                             let widthVal = '420';
@@ -1850,10 +1855,10 @@
                                 widthVal = isSingleLineDescription ? '540' : '260';
                             } else if (item.config.label === "채널 인사이트") {
                                 widthVal = '360';
-                            } else if (item.config.label === "주소") {
-                                widthVal = '400';
+                            } else if (item.config.key === "address") {
+                                widthVal = '780';
                             }
-                            tdStyle = isForEmail ? `style="border:1px solid #cccccc; padding:6px 8px; text-align:left; vertical-align:${(isSingleLineDescription && item.config.label === "채널 소개") || item.config.label === "주소" ? 'middle' : 'top'}; font-size:10pt; font-weight:normal;" width="${widthVal}"` : ((isSingleLineDescription && item.config.label === "채널 소개") || item.config.label === "주소" ? 'class="align-left-single"' : 'class="align-left"');
+                            tdStyle = isForEmail ? `style="border:1px solid #cccccc; padding:6px 8px; text-align:left; vertical-align:${(isSingleLineDescription && item.config.label === "채널 소개") || item.config.key === "address" ? 'middle' : 'top'}; font-size:10pt; font-weight:normal;" width="${widthVal}"` : ((isSingleLineDescription && item.config.label === "채널 소개") || item.config.key === "address" ? 'class="align-left-single"' : 'class="align-left"');
                         }
                         html += `<td ${tdStyle}>&nbsp;</td>`;
                     });
@@ -1885,7 +1890,8 @@
                             html += `<td ${tdCenterStyle}>&nbsp;</td>`;
                         } else {
                             const val = getValueFromData(creator, colTarget.config, rowTarget.dbType === 'external');
-                            const isLeftAlign = (colTarget.config.label === "채널 소개" || colTarget.config.label === "2차 활용" || colTarget.config.label === "채널 인사이트" || colTarget.config.label === "주소");
+                            const isAddress = (colTarget.config.key === "address");
+                            const isLeftAlign = (colTarget.config.label === "채널 소개" || colTarget.config.label === "2차 활용" || colTarget.config.label === "채널 인사이트" || isAddress);
                             let tdStyle = tdCenterStyle;
                             let cellClass = '';
 
@@ -1905,19 +1911,19 @@
                                 } else if (colTarget.config.label === "채널 인사이트") {
                                     widthVal = '380';
                                     maxClass = 'col-insight';
-                                } else if (colTarget.config.label === "주소") {
-                                    widthVal = '400';
+                                } else if (isAddress) {
+                                    widthVal = '780';
                                     maxClass = 'col-address';
                                 }
 
-                                const isSingleOrAddress = (colTarget.config.label === "채널 소개" && isSingleLineDescription) || (colTarget.config.label === "주소");
+                                const isSingleOrAddress = (colTarget.config.label === "채널 소개" && isSingleLineDescription) || isAddress;
                                 const vertAlign = isSingleOrAddress ? 'middle' : 'top';
-                                const whiteSpaceStyle = isSingleOrAddress ? 'white-space:normal;' : 'white-space:normal; line-height:1.5;';
+                                const whiteSpaceStyle = isAddress ? 'white-space:nowrap;' : (isSingleOrAddress ? 'white-space:normal;' : 'white-space:normal; line-height:1.5;');
                                 const paddingStyle = (colTarget.config.label === "채널 소개" && isSingleLineDescription) ? 'padding:4px 6px;' : 'padding:6px 8px;';
                                 const fSize = (colTarget.config.label === "채널 소개" && isSingleLineDescription) ? '8.5pt' : '10pt';
 
                                 tdStyle = isForEmail
-                                    ? `style="border:1px solid #cccccc; ${paddingStyle} text-align:left; vertical-align:${vertAlign}; ${whiteSpaceStyle} font-size:${fSize}; font-weight:normal; word-break:keep-all; word-wrap:break-word;" width="${widthVal}"`
+                                    ? `style="border:1px solid #cccccc; ${paddingStyle} text-align:left; vertical-align:${vertAlign}; ${whiteSpaceStyle} font-size:${fSize}; font-weight:normal; word-break:keep-all;" width="${widthVal}"`
                                     : '';
                                 cellClass = isForEmail ? '' : (isSingleOrAddress ? `class="align-left-single ${maxClass}"` : `class="align-left ${maxClass}"`);
                                 html += `<td ${tdStyle} ${cellClass}>${formattedVal}</td>`;
@@ -2175,12 +2181,18 @@
 
                 const creator = getCreatorFromRow(rowTarget);
                 const isHaeunRow = (rowTarget.dbType === 'internal' && rowTarget.index === 0);
+                const isOnlyAddress = selectedItems.length > 0 && selectedItems.every(item => item.type === 'blank' || (item.type === 'real' && item.config.key === 'address'));
                 
                 let plainLines = [];
                 let htmlLines = [];
                 
-                plainLines.push(`[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)`);
-                htmlLines.push(`<b>[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)</b>`);
+                if (isOnlyAddress) {
+                    plainLines.push(`[${creator.creator} 배송정보]`);
+                    htmlLines.push(`<b>[${creator.creator} 배송정보]</b>`);
+                } else {
+                    plainLines.push(`[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)`);
+                    htmlLines.push(`<b>[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)</b>`);
+                }
                 plainLines.push("");
                 htmlLines.push("");
 
@@ -2250,7 +2262,8 @@
 
             const extraNotices = getDynamicNotices();
             if (extraNotices.length > 0) {
-                plainBlocks.push(extraNotices.join("\n"));
+                const plainNotices = extraNotices.map(n => n.replace(/<[^>]+>/g, ''));
+                plainBlocks.push(plainNotices.join("\n"));
                 htmlBlocks.push(extraNotices.join("<br>"));
             }
 
@@ -2313,6 +2326,7 @@
 </body>
 
 </html>
+
 
 
 
