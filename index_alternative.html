@@ -503,6 +503,16 @@
             transform: translateY(-0.5px);
         }
 
+        .copy-text-link {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        .copy-text-link:hover {
+            background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+            transform: translateY(-0.5px);
+        }
+
         .copy-image {
             background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
             box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
@@ -1029,6 +1039,7 @@
                         <div class="action-buttons-group">
                             <button class="btn-action copy-gmail" onclick="copyToGmail()">📋 메일용 복사</button>
                             <button class="btn-action copy-text" onclick="copyToText()">📝 텍스트 복사</button>
+                            <button class="btn-action copy-text-link" onclick="copyToText(true)">🔗 텍스트 복사(링크 포함)</button>
                             <button class="btn-action copy-image" onclick="copyToImage()">📸 이미지 복사</button>
                             <button class="btn-action sort-price" onclick="sortByHighestPrice()">💰 단가 높은순 정렬</button>
                             <button class="btn-action reset-all" onclick="resetAll()">🔄 전체 초기화</button>
@@ -2166,11 +2177,25 @@
             return "";
         }
 
-        function copyToText() {
+        function copyToText(includeLinks = false) {
             if (selectedRows.length === 0 || selectedItems.length === 0) return alert('선택된 항목이 없습니다.');
             
             let plainBlocks = [];
             let htmlBlocks = [];
+
+            const hasYtSelected = selectedItems.some(i => i.type === 'real' && (i.config.group === 'youtube' || (i.config.label && i.config.label.includes('유튜브'))));
+            const hasIgSelected = selectedItems.some(i => i.type === 'real' && (i.config.group === 'instagram' || (i.config.label && (i.config.label.includes('인스타') || i.config.label.includes('리그램')))));
+
+            let needYoutube = false;
+            let needInsta = false;
+            if (hasYtSelected && !hasIgSelected) {
+                needYoutube = true;
+            } else if (!hasYtSelected && hasIgSelected) {
+                needInsta = true;
+            } else {
+                needYoutube = true;
+                needInsta = true;
+            }
 
             selectedRows.forEach(rowTarget => {
                 if (rowTarget.type === 'blank') {
@@ -2180,6 +2205,8 @@
                 }
 
                 const creator = getCreatorFromRow(rowTarget);
+                if (!creator) return;
+
                 const isHaeunRow = (rowTarget.dbType === 'internal' && rowTarget.index === 0);
                 const isOnlyAddress = selectedItems.length > 0 && selectedItems.every(item => item.type === 'blank' || (item.type === 'real' && item.config.key === 'address'));
                 
@@ -2193,6 +2220,32 @@
                     plainLines.push(`[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)`);
                     htmlLines.push(`<b>[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)</b>`);
                 }
+
+                if (includeLinks) {
+                    let linkLines = [];
+                    let linkHtmlLines = [];
+
+                    if (needYoutube && creator.youtube_url) {
+                        const ytUrl = String(creator.youtube_url).trim();
+                        if (ytUrl) {
+                            linkLines.push(`  • 유튜브: ${ytUrl}`);
+                            linkHtmlLines.push(`&nbsp;&nbsp;• 유튜브: <a href="${ytUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">${ytUrl}</a>`);
+                        }
+                    }
+                    if (needInsta && creator.instagram_url) {
+                        const igUrl = String(creator.instagram_url).trim();
+                        if (igUrl) {
+                            linkLines.push(`  • 인스타그램: ${igUrl}`);
+                            linkHtmlLines.push(`&nbsp;&nbsp;• 인스타그램: <a href="${igUrl}" target="_blank" style="color:#007bff; text-decoration:underline;">${igUrl}</a>`);
+                        }
+                    }
+
+                    if (linkLines.length > 0) {
+                        linkLines.forEach(l => plainLines.push(l));
+                        linkHtmlLines.forEach(l => htmlLines.push(`<span style="font-weight:normal;">${l}</span>`));
+                    }
+                }
+
                 plainLines.push("");
                 htmlLines.push("");
 
@@ -2265,13 +2318,19 @@
             
             window.lastCopiedText = plainResult;
 
+            const toastMsg = includeLinks ? '텍스트(링크 포함)가 복사되었습니다!' : '복사되었습니다!';
+
             const blobHtml = new Blob([htmlResult], { type: "text/html" });
             const blobText = new Blob([plainResult], { type: "text/plain" });
             const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobText })];
 
-            navigator.clipboard.write(data).then(() => { showToast(); }).catch(err => {
-                navigator.clipboard.writeText(plainResult).then(() => { showToast(); });
+            navigator.clipboard.write(data).then(() => { showToast(toastMsg); }).catch(err => {
+                navigator.clipboard.writeText(plainResult).then(() => { showToast(toastMsg); });
             });
+        }
+
+        function copyToTextWithLinks() {
+            copyToText(true);
         }
 
         function parsePriceToNumber(valStr) {
