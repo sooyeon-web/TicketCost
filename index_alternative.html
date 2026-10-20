@@ -1730,17 +1730,25 @@
         function getDynamicNotices() {
             let notices = [];
             const hasModel = selectedItems.some(i => i.type === 'real' && (i.config.label === "모델" || i.config.key === "model"));
-            const hasModelSpecialCreator = selectedRows.some(r => {
+
+            // 모델 헤메스 필수 대상 크리에이터 목록 추출
+            const specialModelTargetNames = ["성해은", "김지영", "이제연"];
+            const matchedSpecialNames = [];
+            selectedRows.forEach(r => {
                 const c = getCreatorFromRow(r);
-                if (!c || !c.creator) return false;
+                if (!c || !c.creator) return;
                 const name = c.creator.trim();
-                return name.includes("성해은") || name.includes("김지영") || name.includes("이제연");
+                specialModelTargetNames.forEach(target => {
+                    if (name.includes(target) && !matchedSpecialNames.includes(target)) {
+                        matchedSpecialNames.push(target);
+                    }
+                });
             });
 
             if (hasModel) {
                 notices.push("- 국내 / 비전속 / 전매체 기준");
-                if (hasModelSpecialCreator) {
-                    notices.push("- 전속 헤메스 섭외 필수");
+                if (matchedSpecialNames.length > 0) {
+                    notices.push(`- 전속 헤메스 섭외 필수 (*${matchedSpecialNames.join(', ')})`);
                 }
             }
 
@@ -2518,6 +2526,7 @@
 </body>
 
 </html>
+
 
 
 
