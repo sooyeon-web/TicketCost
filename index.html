@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -2306,6 +2306,9 @@
             let plainBlocks = [];
             let htmlBlocks = [];
 
+            // 모델만 선택된 경우 체크 (blank 제외하고 실제 항목이 model만인지)
+            const isOnlyModel = selectedItems.length > 0 && selectedItems.every(item => item.type === 'blank' || (item.type === 'real' && item.config.key === 'model'));
+
             const hasYtSelected = selectedItems.some(i => i.type === 'real' && (i.config.group === 'youtube' || (i.config.label && i.config.label.includes('유튜브'))));
             const hasIgSelected = selectedItems.some(i => i.type === 'real' && (i.config.group === 'instagram' || (i.config.label && (i.config.label.includes('인스타') || i.config.label.includes('리그램')))));
 
@@ -2339,6 +2342,9 @@
                 if (isOnlyAddress) {
                     plainLines.push(`[${creator.creator} 배송정보]`);
                     htmlLines.push(`<b>[${creator.creator} 배송정보]</b>`);
+                } else if (isOnlyModel) {
+                    plainLines.push(`[${creator.creator} 모델 비용]`);
+                    htmlLines.push(`<b>[${creator.creator} 모델 비용]</b>`);
                 } else {
                     plainLines.push(`[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)`);
                     htmlLines.push(`<b>[${creator.creator} 콘텐츠 협업 비용] (*VAT별도)</b>`);
@@ -2457,8 +2463,36 @@
                 htmlBlocks.push(htmlLines.join("<br>"));
             });
 
-            const plainResult = plainBlocks.join("\n\n") + "\n";
-            const htmlResult = `<div style="font-family:sans-serif; font-size:10pt; line-height:1.5; font-weight:normal;">${htmlBlocks.join("<br><br>")}</div>`;
+            // 모델만 선택된 경우 하단 문구 추가
+            let modelFooterPlain = "";
+            let modelFooterHtml = "";
+            if (isOnlyModel) {
+                const specialModelTargetNames = ["성해은", "김지영"];
+                const matchedModelNames = [];
+                selectedRows.forEach(r => {
+                    const c = getCreatorFromRow(r);
+                    if (!c || !c.creator) return;
+                    const name = c.creator.trim();
+                    specialModelTargetNames.forEach(target => {
+                        if (name.includes(target) && !matchedModelNames.includes(target)) {
+                            matchedModelNames.push(target);
+                        }
+                    });
+                });
+
+                const footerLines = [];
+                footerLines.push("- 부가세 별도");
+                footerLines.push("- 국내 / 비전속 / 전매체 기준");
+                if (matchedModelNames.length > 0) {
+                    footerLines.push(`- 전속 헤메스 섭외 필수 (*${matchedModelNames.join(', ')})`);
+                }
+
+                modelFooterPlain = "\n\n" + footerLines.join("\n");
+                modelFooterHtml = "<br><br>" + footerLines.map(l => `<span style="font-weight:normal;">${l}</span>`).join("<br>");
+            }
+
+            const plainResult = plainBlocks.join("\n\n") + modelFooterPlain + "\n";
+            const htmlResult = `<div style="font-family:sans-serif; font-size:10pt; line-height:1.5; font-weight:normal;">${htmlBlocks.join("<br><br>")}${modelFooterHtml}</div>`;
             
             window.lastCopiedText = plainResult;
 
