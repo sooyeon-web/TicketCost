@@ -2516,36 +2516,38 @@
         }
 
         let draggedRowIndex = null;
+        let isDragInitiated = false;
 
         function handleCreatorMouseDown(e) {
-            // 삭제 버튼 클릭 시에는 드래그를 활성화하지 않음
-            if (e.target.closest('.row-delete-btn')) return;
+            // 삭제 버튼이나 링크 클릭 시에는 드래그를 활성화하지 않음
+            if (e.target.closest('.row-delete-btn') || e.target.closest('a')) return;
             const tr = e.target.closest('tr');
             if (tr) {
+                isDragInitiated = true;
                 tr.setAttribute('draggable', 'true');
             }
         }
 
         // 마우스 클릭 후 드래그하지 않고 뗐을 때 tr의 draggable 속성 안전 해제
         window.addEventListener('mouseup', () => {
+            isDragInitiated = false;
             document.querySelectorAll('#table-output tr[draggable="true"]').forEach(row => {
                 row.removeAttribute('draggable');
             });
         });
 
         function handleRowDragStart(e, index) {
-            const wrapper = e.target.closest('.creator-cell-wrapper');
-            // 크리에이터 셀 영역에서 시작된 드래그가 아니면 드래그 취소
-            if (!wrapper) {
+            // 크리에이터 핸들 영역에서 시작된 드래그가 아니면 취소
+            if (!isDragInitiated) {
                 e.preventDefault();
                 return;
             }
 
             draggedRowIndex = index;
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', index);
-            const tr = e.target.closest('tr');
-            if (tr) {
+            e.dataTransfer.setData('text/plain', String(index));
+            const tr = e.target.closest('tr') || e.target;
+            if (tr && tr.classList) {
                 tr.classList.add('is-dragging');
             }
         }
@@ -2561,7 +2563,7 @@
 
         function handleRowDragLeave(e) {
             const tr = e.target.closest('tr');
-            if (tr) {
+            if (tr && (!e.relatedTarget || !tr.contains(e.relatedTarget))) {
                 tr.classList.remove('drag-over');
             }
         }
@@ -2576,8 +2578,12 @@
             document.querySelectorAll('#table-output tr[draggable="true"]').forEach(row => {
                 row.removeAttribute('draggable');
             });
+            isDragInitiated = false;
 
-            if (draggedRowIndex === null || draggedRowIndex === targetIndex) return;
+            if (draggedRowIndex === null || draggedRowIndex === targetIndex) {
+                draggedRowIndex = null;
+                return;
+            }
 
             const movedItem = selectedRows.splice(draggedRowIndex, 1)[0];
             selectedRows.splice(targetIndex, 0, movedItem);
@@ -2589,6 +2595,7 @@
         }
 
         function handleRowDragEnd(e) {
+            isDragInitiated = false;
             draggedRowIndex = null;
             document.querySelectorAll('#table-output tr').forEach(row => {
                 row.removeAttribute('draggable');
@@ -2962,6 +2969,7 @@
 </body>
 
 </html>
+
 
 
 
