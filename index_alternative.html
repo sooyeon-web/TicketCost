@@ -171,6 +171,19 @@
             gap: 8px;
         }
 
+        #item-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .item-btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
         /* Buttons */
         .btn {
             font-family: inherit;
@@ -1488,23 +1501,32 @@
         }
 
         const itemsConfig = [
-            { label: "유튜브 브랜디드 콘텐츠", group: "youtube", key: "bdc" },
-            { label: "유튜브 기획 PPL", group: "youtube", key: "planned_ppl" },
-            { label: "유튜브 쇼츠", group: "youtube", key: "shorts" },
-            { label: "인스타그램 릴스", group: "instagram", key: "reels" },
-            { label: "인스타그램 사진", group: "instagram", key: "feed" },
-            { label: "출연 단가", group: "direct", key: "appearance" },
-            { label: "방문 거마비", group: "direct", key: "visit_fee" },
-            { label: "스토리 리그램", group: "instagram", key: "regram" },
-            { label: "샤오홍슈 영상", group: "xiaohongshu", key: "video" },
-            { label: "샤오홍슈 이미지", group: "xiaohongshu", key: "image" },
-            { label: "모델", group: "model", key: "model", isMultiColumn: true },
-            { label: "채널 소개", group: "direct", key: "description" },
-            { label: "2차 활용", group: "direct", key: "license" },
-            { label: "채널 인사이트", group: "direct", key: "channel_insight" },
-            { label: "RS 진행 기준", btnLabel: "RS", group: "direct", key: "rs" },
-            { label: "비고", btnLabel: "비고", group: "direct", key: "note" },
-            { label: "배송정보", btnLabel: "주소", group: "direct", key: "address" }
+            // 1번줄: BDC, PPL, 쇼츠
+            { label: "유튜브 브랜디드 콘텐츠", btnLabel: "YT BDC", group: "youtube", key: "bdc", row: 1 },
+            { label: "유튜브 기획 PPL", btnLabel: "YT PPL", group: "youtube", key: "planned_ppl", row: 1 },
+            { label: "유튜브 쇼츠", btnLabel: "쇼츠", group: "youtube", key: "shorts", row: 1 },
+
+            // 2번줄: 릴스, 피드, 스토리, 거마비
+            { label: "인스타그램 릴스", btnLabel: "IG 릴스", group: "instagram", key: "reels", row: 2 },
+            { label: "인스타그램 사진", btnLabel: "IG 피드", group: "instagram", key: "feed", row: 2 },
+            { label: "스토리 리그램", btnLabel: "IG 스토리", group: "instagram", key: "regram", row: 2 },
+            { label: "방문 거마비", btnLabel: "거마비", group: "direct", key: "visit_fee", row: 2 },
+
+            // 3번줄: 출연, 모델, 2차활용, RS
+            { label: "출연 단가", group: "direct", key: "appearance", row: 3 },
+            { label: "모델", group: "model", key: "model", isMultiColumn: true, row: 3 },
+            { label: "2차 활용", group: "direct", key: "license", row: 3 },
+            { label: "RS 진행 기준", btnLabel: "RS", group: "direct", key: "rs", row: 3 },
+
+            // 4번줄: 비고, 주소, 소개
+            { label: "비고", btnLabel: "비고", group: "direct", key: "note", row: 4 },
+            { label: "배송정보", btnLabel: "주소", group: "direct", key: "address", row: 4 },
+            { label: "채널 소개", group: "direct", key: "description", row: 4 },
+
+            // 5번줄: 나머지
+            { label: "샤오홍슈 영상", group: "xiaohongshu", key: "video", row: 5 },
+            { label: "샤오홍슈 이미지", group: "xiaohongshu", key: "image", row: 5 },
+            { label: "채널 인사이트", group: "direct", key: "channel_insight", row: 5 }
         ];
 
         /* =========================================================
@@ -1516,7 +1538,7 @@
                 id: "rs",
                 label: "RS 가능 채널",
                 creators: ["로지", "김여명", "전지영", "하나보노", "반채영", "솔아"],
-                defaultItemIndexes: [14, 11, 15],
+                defaultItemIndexes: [10, 13, 11],
                 notices: []
             },
             {
@@ -1597,7 +1619,7 @@
 
             // 2. 항목(열)을 제안 기본 열로 설정
             selectedItems = [];
-            const defaultProposalItemIndexes = preset.defaultItemIndexes || [0, 1, 3, 11];
+            const defaultProposalItemIndexes = preset.defaultItemIndexes || [0, 1, 3, 13];
             defaultProposalItemIndexes.forEach(idx => {
                 if (itemsConfig[idx]) {
                     selectedItems.push({ type: 'real', config: itemsConfig[idx], index: idx });
@@ -1712,11 +1734,17 @@
             filterExternalCategory();
 
             const itemContainer = document.getElementById('item-buttons');
+            itemContainer.innerHTML = '';
+
+            // 공란 열 추가/제거 버튼 행
+            const blankRow = document.createElement('div');
+            blankRow.className = 'item-btn-row';
+
             const blankItemBtn = document.createElement('button');
             blankItemBtn.className = 'btn btn-blank';
             blankItemBtn.innerHTML = `➕ 공란 열 추가 <span class="order-badge" id="blank-item-badge">0</span>`;
             blankItemBtn.onclick = () => addBlankItem();
-            itemContainer.appendChild(blankItemBtn);
+            blankRow.appendChild(blankItemBtn);
 
             const removeBlankItemBtn = document.createElement('button');
             removeBlankItemBtn.className = 'btn btn-blank';
@@ -1724,7 +1752,17 @@
             removeBlankItemBtn.style.borderColor = 'rgba(239, 68, 68, 0.3)';
             removeBlankItemBtn.innerHTML = `➖ 공란 열 제거`;
             removeBlankItemBtn.onclick = () => removeLastBlankItem();
-            itemContainer.appendChild(removeBlankItemBtn);
+            blankRow.appendChild(removeBlankItemBtn);
+
+            itemContainer.appendChild(blankRow);
+
+            // 1~5번줄 행 컨테이너 생성
+            const rows = [1, 2, 3, 4, 5].map(() => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'item-btn-row';
+                itemContainer.appendChild(rowDiv);
+                return rowDiv;
+            });
 
             itemsConfig.forEach((item, idx) => {
                 const btn = document.createElement('button');
@@ -1732,7 +1770,13 @@
                 const displayLabel = item.btnLabel || item.label;
                 btn.innerHTML = `${displayLabel}<span class="order-badge" id="i-badge-${idx}">-</span>`;
                 btn.onclick = () => toggleItem(item, idx, btn);
-                itemContainer.appendChild(btn);
+
+                const targetRowIdx = (item.row ? item.row - 1 : 0);
+                if (rows[targetRowIdx]) {
+                    rows[targetRowIdx].appendChild(btn);
+                } else {
+                    itemContainer.appendChild(btn);
+                }
             });
 
             // 5. 제안 크리에이터 리스트 버튼 렌더링
@@ -2935,6 +2979,7 @@
 </body>
 
 </html>
+
 
 
 
