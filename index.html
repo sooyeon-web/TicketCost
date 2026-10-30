@@ -184,6 +184,24 @@
             align-items: center;
         }
 
+        .item-util-row {
+            margin-bottom: 2px;
+        }
+
+        .btn-blank-compact {
+            padding: 4px 10px !important;
+            font-size: 12px !important;
+            min-height: 28px !important;
+            gap: 5px !important;
+            border-radius: 6px !important;
+        }
+
+        .btn-blank-compact .order-badge {
+            width: 17px !important;
+            height: 17px !important;
+            font-size: 10px !important;
+        }
+
         /* Buttons */
         .btn {
             font-family: inherit;
@@ -1501,10 +1519,11 @@
         }
 
         const itemsConfig = [
-            // 1번줄: BDC, PPL, 쇼츠
+            // 1번줄: BDC, PPL, 쇼츠, 2차활용
             { label: "유튜브 브랜디드 콘텐츠", btnLabel: "YT BDC", group: "youtube", key: "bdc", row: 1 },
             { label: "유튜브 기획 PPL", btnLabel: "YT PPL", group: "youtube", key: "planned_ppl", row: 1 },
             { label: "유튜브 쇼츠", btnLabel: "쇼츠", group: "youtube", key: "shorts", row: 1 },
+            { label: "2차 활용", group: "direct", key: "license", row: 1 },
 
             // 2번줄: 릴스, 피드, 스토리, 거마비
             { label: "인스타그램 릴스", btnLabel: "IG 릴스", group: "instagram", key: "reels", row: 2 },
@@ -1512,21 +1531,20 @@
             { label: "스토리 리그램", btnLabel: "IG 스토리", group: "instagram", key: "regram", row: 2 },
             { label: "방문 거마비", btnLabel: "거마비", group: "direct", key: "visit_fee", row: 2 },
 
-            // 3번줄: 출연, 모델, 2차활용, RS
+            // 3번줄: 출연, 모델, RS
             { label: "출연 단가", group: "direct", key: "appearance", row: 3 },
             { label: "모델", group: "model", key: "model", isMultiColumn: true, row: 3 },
-            { label: "2차 활용", group: "direct", key: "license", row: 3 },
             { label: "RS 진행 기준", btnLabel: "RS", group: "direct", key: "rs", row: 3 },
 
-            // 4번줄: 비고, 주소, 소개
+            // 4번줄: 비고, 주소, 소개, 채널 인사이트
             { label: "비고", btnLabel: "비고", group: "direct", key: "note", row: 4 },
             { label: "배송정보", btnLabel: "주소", group: "direct", key: "address", row: 4 },
             { label: "채널 소개", group: "direct", key: "description", row: 4 },
+            { label: "채널 인사이트", group: "direct", key: "channel_insight", row: 4 },
 
-            // 5번줄: 나머지
+            // 5번줄: 샤오홍슈 영상, 샤오홍슈 이미지
             { label: "샤오홍슈 영상", group: "xiaohongshu", key: "video", row: 5 },
-            { label: "샤오홍슈 이미지", group: "xiaohongshu", key: "image", row: 5 },
-            { label: "채널 인사이트", group: "direct", key: "channel_insight", row: 5 }
+            { label: "샤오홍슈 이미지", group: "xiaohongshu", key: "image", row: 5 }
         ];
 
         /* =========================================================
@@ -1619,7 +1637,7 @@
 
             // 2. 항목(열)을 제안 기본 열로 설정
             selectedItems = [];
-            const defaultProposalItemIndexes = preset.defaultItemIndexes || [0, 1, 3, 13];
+            const defaultProposalItemIndexes = preset.defaultItemIndexes || [0, 1, 4, 13];
             defaultProposalItemIndexes.forEach(idx => {
                 if (itemsConfig[idx]) {
                     selectedItems.push({ type: 'real', config: itemsConfig[idx], index: idx });
@@ -1738,19 +1756,21 @@
 
             // 공란 열 추가/제거 버튼 행
             const blankRow = document.createElement('div');
-            blankRow.className = 'item-btn-row';
+            blankRow.className = 'item-btn-row item-util-row';
 
             const blankItemBtn = document.createElement('button');
-            blankItemBtn.className = 'btn btn-blank';
-            blankItemBtn.innerHTML = `➕ 공란 열 추가 <span class="order-badge" id="blank-item-badge">0</span>`;
+            blankItemBtn.className = 'btn btn-blank btn-blank-compact';
+            blankItemBtn.title = '공란 열 추가';
+            blankItemBtn.innerHTML = `➕ 열 <span class="order-badge" id="blank-item-badge">0</span>`;
             blankItemBtn.onclick = () => addBlankItem();
             blankRow.appendChild(blankItemBtn);
 
             const removeBlankItemBtn = document.createElement('button');
-            removeBlankItemBtn.className = 'btn btn-blank';
+            removeBlankItemBtn.className = 'btn btn-blank btn-blank-compact';
+            removeBlankItemBtn.title = '공란 열 제거';
             removeBlankItemBtn.style.color = '#ef4444';
             removeBlankItemBtn.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-            removeBlankItemBtn.innerHTML = `➖ 공란 열 제거`;
+            removeBlankItemBtn.innerHTML = `➖ 열`;
             removeBlankItemBtn.onclick = () => removeLastBlankItem();
             blankRow.appendChild(removeBlankItemBtn);
 
@@ -3013,6 +3033,7 @@
 </body>
 
 </html>
+
 
 
 
