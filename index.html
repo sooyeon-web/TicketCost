@@ -2323,20 +2323,12 @@
                 const safeName = (c.creator || '').replace(/'/g, "\\'");
                 const starHtml = `<span class="fav-star-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${safeName}', event)" title="${isFav ? '즐겨찾기 해제' : '즐겨찾기 추가'}">${isFav ? '★' : '☆'}</span>`;
 
-                const folParts = [];
-                if (c.instagram_followers && c.instagram_followers !== '자료없음') folParts.push(`IG ${c.instagram_followers}`);
-                if (c.youtube_subscribers) folParts.push(`YT ${c.youtube_subscribers}`);
-                const folSubHtml = folParts.length > 0 ? `<div class="ext-follower-sub">${folParts.join(' · ')}</div>` : '';
-
                 tr.innerHTML = `
                     <td style="text-align: center;"><span class="order-badge" id="ext-badge-${idx}">${badgeText}</span></td>
                     <td>
                         <div class="ext-channel-name-wrapper">
                             ${starHtml}
-                            <div style="min-width: 0;">
-                                <div class="ext-channel-name" title="${c.creator}">${c.creator}</div>
-                                ${folSubHtml}
-                            </div>
+                            <div class="ext-channel-name" title="${c.creator}">${c.creator}</div>
                         </div>
                     </td>
                     <td><div class="cat-tags-container">${recTags}</div></td>
